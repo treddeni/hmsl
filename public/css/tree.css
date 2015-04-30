@@ -1,0 +1,133 @@
+.fieldInput
+{
+  width:    70px;
+  margin:   0px;
+  padding:  0px;
+  border:   0px;
+}
+
+.fieldNameInput
+{
+  width:    70px;
+  margin:   0px;
+  padding:  0px;
+  border:   0px;
+  float:    left;
+}
+
+.node
+{
+  width:    300px;
+  margin:   0px;
+  padding:  0px;
+  border:   0px;
+}
+
+#treeTable
+{
+  border-collapse:  collapse;
+  border:           1px solid black;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.header
+{
+  margin:   0px;
+  padding:  0px 0px;
+  border:   1px solid black;
+  width:    auto!important;
+}
+
+.cell
+{
+  margin:   0px;
+  padding:  0px 4px;
+  border:   1px solid black;
+  width:    auto!important;
+}
+
+.row
+{
+  //margin:   0px;
+  //padding:  0px;
+}
+
+.redips-drag
+{
+  white-space:  nowrap;
+  display:      inline;
+  font-size:    12px;
+  margin:       4px 4px 0px 0px
+}
+
+.show-expand
+{
+  visibility: visible;
+}
+
+.hide-expand
+{
+  visibility: hidden;
+}
+
+.resizeColGrip
+{
+  width:    8px;
+  height:   20px;
+  cursor:   col-resize;
+  float:    left;
+  margin:   0px;
+  padding:  0px;
+}
+
+.resizeColGrip:hover
+{
+  background-color: #99CCFF;
+}
+
+.moveColGrip
+{
+  width:    8px;
+  height:   20px;
+  cursor:   move;
+  float:    left;
+  margin:   0px;
+  padding:  0px;
+}
+
+.moveColGrip:hover
+{
+  background-color: #99CCFF;
+}
+
+#resizeLine
+{
+  height:       4000px;
+  border-left:  1px dashed black;
+  visibility:   hidden;
+  position:     absolute;
+  top:          0px;
+  left:         600px;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#redips-drag
+{
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
