@@ -79,6 +79,6 @@ function getAssemblyMarkup(nodeID, newNodeID, depth)
 {
   var node    = findNodeInTree(nodeID);
   var parent  = findParentInTree(nodeID);
-  return addRow(node, depth, '', parent.id);
+  return addRow(node, depth, 'ancestor' + parent.id, parent.id);
 }
 

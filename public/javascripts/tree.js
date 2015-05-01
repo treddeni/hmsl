@@ -312,10 +312,10 @@ var copyNode = function(source)
   var sourceNode = findNodeInTree(nodeID);
   var sourceParentNode = findParentInTree(nodeID);
   
-  var newNode = jQuery.extend(true, {}, sourceNode);                      //clone the source node
-  assignNewNodeIDs(newNode);                                              //assign unique ids to each node in the clone
+  var newNode = jQuery.extend(true, {}, sourceNode);                                //clone the source node
+  assignNewNodeIDs(newNode);                                                        //assign unique ids to each node in the clone
   
-   var nodeIndex = getNodeIndex(sourceParentNode.nodes, sourceNode.id);
+  var nodeIndex = getNodeIndex(sourceParentNode.nodes, sourceNode.id);              //TODO: handle case where the user tries to copy a top level node
   sourceParentNode.nodes.splice(nodeIndex, 0, newNode);
   
   var newRow = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
@@ -323,7 +323,7 @@ var copyNode = function(source)
   var newRowObj = document.getElementById('rowid' + newNode.id);
   REDIPS.drag.enableDivs('init', newRowObj.getElementsByTagName('div'));
   
-  refreshDataModelDisplay();                                      //TODO: temp for displaying the model on the page for debugging purposes
+  refreshDataModelDisplay();                                                        //TODO: temp for displaying the model on the page for debugging purposes
 };
 
 var assignNewNodeIDs = function(node)
