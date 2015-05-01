@@ -1,7 +1,41 @@
 var markup;
 var uid = 1;
 var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
-var tree;
+//var tree;
+
+var tree = { "project-id": 1001, "project-name": "Test", "nextNodeID": 5, "nodes": [{
+  "id": 1,
+  "name": "node1",
+  "values":
+  {
+    "Weight": 1.2,
+    "Cost": "0.50",
+    "Notes": "some bs"
+  },
+  "nodes": [
+    {
+      "id": 2,
+      "name": "node1.1",
+      "values":
+      {
+        "Weight": 1.3,
+        "Notes": "some bs2"
+      },
+      "nodes": [
+        {
+          "id": 3,
+          "name": "node1.1.1",
+          "nodes": []
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "node1.2",
+      "nodes": []
+    }
+  ]
+}]};
 
 var MIN_COLUMN_WIDTH = 70;
 var GRIPS_WIDTH = 16;
@@ -11,7 +45,7 @@ var resizeField = '0';
 
 $(document).ready(function()
 {
-  tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree'));     //get the tree model from the server
+  //tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree'));     //get the tree model from the server
 
   setUniqueIDs(tree.nodes);                                               //TODO: temp hack to make sure the node ids are unique
 
@@ -39,7 +73,7 @@ var refreshDataModelDisplay = function()
 {
   var dataModelTextArea = document.getElementById('data-model');
   dataModelTextArea.value = JSON.stringify(tree, null, '\t');
-}
+};
 
 var getDepth = function(row)
 {
@@ -54,7 +88,7 @@ var getDepth = function(row)
       return parseInt(c.replace('depth', ''));
     }
   }
-}
+};
 
 var getParentID = function(row)
 {
@@ -125,7 +159,7 @@ var addAncestors = function(row, ancestors)
   {
     row.classList.add(ancestors[i]);
   }
-}
+};
 
 var setNewAncestors = function(row, ancestors, parentID)
 {
@@ -155,17 +189,15 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
 
   newParentNode.nodes.push(movedNode);                                                        //add moved node to it's new parent in the model
 
-  //move the assembly in the view
+  //fix up the ancestors classes for the moved row
   var movedRow = document.getElementById('rowid' + movedID);
-  var oldDepth = getDepth(movedRow);
-  var newDepth = getDepth(newParentRow)+1;
-
-  //fix up the ancestors for the moved row
-  var newParentRow = document.getElementById('rowid' + newParentID);
   var ancestors = getAncestors(newParentRow);
   ancestors.push('ancestor' + newParentID);
   setNewAncestors(movedRow, ancestors, newParentID);
 
+  //fix the depth for the moved row
+  var oldDepth = getDepth(movedRow);
+  var newDepth = getDepth(newParentRow)+1;
   movedRow.classList.remove('depth' + oldDepth);                                              //remove old depth class
   movedRow.classList.add('depth' + newDepth);                                                 //add new depth class
   document.getElementById('expandID' + movedID).style.marginLeft = (10 * newDepth) + 'px';    //change the indent of the moved node
@@ -178,7 +210,7 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
       moveNode(movedNode.nodes[i], movedNode.nodes[i].id, movedID, newDepth+1, ancestors);
     }
   }
-}
+};
 
 var moveNode = function(node, nodeID, parentID, newDepth, ancestors)
 {
@@ -199,12 +231,12 @@ var moveNode = function(node, nodeID, parentID, newDepth, ancestors)
 
   if(node.nodes && node.nodes.length > 0)
   {
-    for(var i = node.nodes.length-1; i >= 0; i--)                     // iterate backwards to perserve the order of the child nodes
+    for(var i = node.nodes.length-1; i >= 0; i--)                                           // iterate backwards to perserve the order of the child nodes
     {
       moveNode(node.nodes[i], node.nodes[i].id, nodeID, newDepth+1, newAncestors);
     }
   }
-}
+};
 
 var findNodeInTree = function(nodeID)
 {
@@ -217,7 +249,7 @@ var findNodeInTree = function(nodeID)
         if(foundNode) { return foundNode; }
     }
   }
-}
+};
 
 var findNode = function(nodeID, node)
 {
@@ -250,7 +282,7 @@ var findParentInTree = function(nodeID)
         if(foundParent) { return foundParent; }
     }
   }
-}
+};
 
 var findParent = function(nodeID, node, parent)
 {
@@ -272,9 +304,78 @@ var findParent = function(nodeID, node, parent)
   }
 };
 
-function toggle(id)
+var copyNode = function(source)
 {
-  var row = document.getElementById('rowid' + id);
+  var sourceRow = getAncestorTag(source, 'tr');
+  var nodeID = parseInt(sourceRow.id.replace('rowid', ''));
+  
+  var sourceNode = findNodeInTree(nodeID);
+  var sourceParentNode = findParentInTree(nodeID);
+  
+  var newNode = jQuery.extend(true, {}, sourceNode);                      //clone the source node
+  assignNewNodeIDs(newNode);                                              //assign unique ids to each node in the clone
+  
+   var nodeIndex = getNodeIndex(sourceParentNode.nodes, sourceNode.id);
+  sourceParentNode.nodes.splice(nodeIndex, 0, newNode);
+  
+  var newRow = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
+  $(newRow).insertBefore(sourceRow);
+  var newRowObj = document.getElementById('rowid' + newNode.id);
+  REDIPS.drag.enableDivs('init', newRowObj.getElementsByTagName('div'));
+  
+  refreshDataModelDisplay();                                      //TODO: temp for displaying the model on the page for debugging purposes
+};
+
+var assignNewNodeIDs = function(node)
+{
+  node.id = tree.nextNodeID++;
+  
+  if(node.nodes && node.nodes.length > 0)
+  {
+    for(var i = 0; i < node.nodes.length; i++)
+    {
+      assignNewNodeIDs(node.nodes[i]);
+    }
+  }
+};
+
+var setRowNodeID = function(row, id)
+{
+  row.id = 'rowid' + id;
+  console.log(row.getElementById('expandID' + id));
+};
+
+var getNodeIndex = function(nodes, id)
+{
+  var indexes = $.map(nodes, function(obj, index) 
+  {
+    if(obj.id == id) 
+    {
+        return index;
+    }
+  });
+
+  return indexes[0];
+};
+
+var getAncestorTag = function upTo(el, tagName) 
+{
+  tagName = tagName.toLowerCase();
+
+  while (el && el.parentNode) 
+  {
+    el = el.parentNode;
+    if (el.tagName && el.tagName.toLowerCase() == tagName) 
+    {
+      return el;
+    }
+  }
+};
+
+function toggle(el)
+{
+  var row = getAncestorTag(el, 'tr');
+  var id = parseInt(row.id.replace('rowid', ''));
   var icon = document.getElementById('icon' + id);
 
   if(row.classList.contains('collapsed'))
@@ -317,6 +418,17 @@ function toggle(id)
     row.classList.add('collapsed');
   }
 }
+
+var updateNodeName = function(el)
+{
+  var row = getAncestorTag(el, 'tr');
+  var nodeID = parseInt(row.id.replace('rowid',''));
+  var node = findNodeInTree(nodeID);
+  
+  node.name = el.value;
+  console.log(el.value);
+  refreshDataModelDisplay();                                      //TODO: temp for displaying the model on the page for debugging purposes
+};
 
 function updateFieldValue(field, id)
 {

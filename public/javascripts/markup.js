@@ -7,7 +7,7 @@ function generateMarkup(tree)
     markup += '<th id="colHeader' + fields[i] + '" class="header"><div class="moveColGrip"></div><input id="colHeaderInput' + fields[i] + '" class="fieldNameInput" type="text" value="' + fields[i] + '"/><div id="grip' + i + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div></th>';
   }
 
-  markup += '</tr>';
+  markup += '</tr>'
 
   for(var j = 0; j < 1; j++)
   {
@@ -26,14 +26,15 @@ function addRow(node, depth, ancestors, parent)     //add node and data input fo
   var markup = '';
   var id;
   var classes = 'depth' + depth + ' expanded parent' + parent + ' ' + ancestors;
+  var nodeID = node.id;
 
   var dragHandle = '<div class="redips-drag"><span class="glyphicon glyphicon-move pull-right"></span></div>';
-  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs" style="margin:2px 0px 0px 0px" onclick="deleteNode(' + node.id + ')"><i class="glyphicon glyphicon-remove"></i></a>';
-  var copyButton = '<a href="#" class="pull-right btn btn-info btn-xs" style="margin:2px 4px 0px 0px" onclick="copyNode(' + node.id + ')"><i class="glyphicon glyphicon-plus"></i></a>';
-  var showExpandButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + (depth*10) + 'px" onclick="toggle(' + node.id + ')" class="btn btn-xs show-expand"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-down iconp' + parent + '"></span></a>';
-  var hideExpandButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + (depth*10) + 'px" onclick="toggle(' + node.id + ')" class="btn btn-xs hide-expand"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-down iconp' + parent + '"></span></a>';
+  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs" style="margin:2px 0px 0px 0px" onclick="deleteNode(this)"><i class="glyphicon glyphicon-remove"></i></a>';
+  var copyButton = '<a href="#" class="pull-right btn btn-info btn-xs" style="margin:2px 4px 0px 0px" onclick="copyNode(this)"><i class="glyphicon glyphicon-plus"></i></a>';
+  var showExpandButton = '<a id="expandID' + nodeID + '" href="#" style="margin-left:' + (depth*10) + 'px" onclick="toggle(this)" class="btn btn-xs show-expand"><span id="icon' + nodeID + '" class="glyphicon glyphicon-chevron-down iconp' + parent + '"></span></a>';
+  var hideExpandButton = '<a id="expandID' + nodeID + '" href="#" style="margin-left:' + (depth*10) + 'px" onclick="toggle(this)" class="btn btn-xs hide-expand"><span id="icon' + nodeID + '" class="glyphicon glyphicon-chevron-down iconp' + parent + '"></span></a>';
 
-  markup += '<tr id="rowid' + node.id + '" class="' + classes + '"><td class="redips-rowhandler cell">';
+  markup += '<tr id="rowid' + nodeID + '" class="' + classes + '"><td class="redips-rowhandler cell">';
   markup += deleteButton + copyButton + dragHandle;
 
   if(node.nodes && node.nodes.length > 0)                                       //if node is a parent
@@ -45,19 +46,19 @@ function addRow(node, depth, ancestors, parent)     //add node and data input fo
     markup += hideExpandButton;                                                 //hide the expansion button
   }
 
-  markup += '<input class="node" type="text" value="' + node.name + '"/></td>';
+  markup += '<input class="node" type="text" value="' + node.name + '" oninput="updateNodeName(this)"/></td>';
 
   for(var i = 0; i < fields.length; i++)                                        //add the data inputs for each fields
   {
-    id = fields[i] + node.id;
+    id = fields[i] + nodeID;
 
     if(node.values && node.values[fields[i]])
     {
-      markup += '<td class="cell"><input class="fieldInput fieldInput' + fields[i] + '" type="text" id="' + id + '" value="' + node.values[fields[i]] + '" oninput="updateFieldValue(\'' + fields[i] + '\', \'' + node.id + '\')"/></td>';
+      markup += '<td class="cell"><input class="fieldInput fieldInput' + fields[i] + '" type="text" id="' + id + '" value="' + node.values[fields[i]] + '" oninput="updateFieldValue(\'' + fields[i] + '\', \'' + nodeID + '\')"/></td>';
     }
     else
     {
-      markup += '<td class="cell"><input class="fieldInput fieldInput' + fields[i] + '" type="text" id="' + id + '" oninput="updateFieldValue(\'' + fields[i] + '\', \'' + node.id + '\')"/></td>';
+      markup += '<td class="cell"><input class="fieldInput fieldInput' + fields[i] + '" type="text" id="' + id + '" oninput="updateFieldValue(\'' + fields[i] + '\', \'' + nodeID + '\')"/></td>';
     }
   }
 
@@ -67,17 +68,17 @@ function addRow(node, depth, ancestors, parent)     //add node and data input fo
   {
     for(var i = 0; i < node.nodes.length; i++)
     {
-      markup += addRow(node.nodes[i], depth+1, ancestors + ' ancestor' + node.id, node.id);
+      markup += addRow(node.nodes[i], depth+1, ancestors + ' ancestor' + nodeID, nodeID);
     }
   }
 
   return markup;
 }
 
-function getAssemblyMarkup(nodeID)
+function getAssemblyMarkup(nodeID, newNodeID, depth)
 {
   var node    = findNodeInTree(nodeID);
   var parent  = findParentInTree(nodeID);
-  return addRow(node, 0, '', parent.id);
+  return addRow(node, depth, '', parent.id);
 }
 

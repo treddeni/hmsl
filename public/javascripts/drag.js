@@ -12,7 +12,6 @@ redips.init = function () {
 
   rd.event.rowDropped = function (newParentRow)
   {
-    var pos           = rd.getPosition();
     var movedID       = parseInt(rd.objOld.id.replace('rowid', ''));
     var movedRow      = document.getElementById(rd.objOld.id);
     var newParentID   = parseInt(newParentRow.id.replace('rowid', ''));
@@ -34,7 +33,7 @@ redips.init = function () {
 
   rd.event.rowChanged = function ()
   {
-    var pos = rd.getPosition();                   // get target and source position (method returns positions as array)
+    //var pos = rd.getPosition();                   // get target and source position (method returns positions as array)
     //console.log('Changed: ' + pos[0]);          // display current table and current row
   };
 

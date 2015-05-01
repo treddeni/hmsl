@@ -9,6 +9,7 @@ REDIPS.drag = (function ()
   var init,           // initialization
     initTables,         // table initialization
     enableDrag,         // method attaches / detaches onmousedown and onscroll event handlers for DIV elements
+    enableDivs,
     handlerOnMouseDown,     // onmousedown handler
     handlerOnMouseUp,     // onmouseup handler
     handlerOnMouseMove,     // onmousemove handler for the document level
@@ -1714,10 +1715,34 @@ REDIPS.drag = (function ()
    * @name REDIPS.drag#enableDrag
    * @see <a href="#init">init</a>
    */
-  enableDrag = function (enable_flag, el) {
-    // define local variables
-    var i, j, k,    // local variables used in loop
-      div = [],   // collection of div elements contained in tables or one div element
+  enableDrag = function (enable_flag, el) 
+  {
+    var div = [];                                                                     // collection of div elements contained in tables or one div element
+    
+    if (el === undefined)                                                             // collect DIV elements inside current drag area (drag elements and scroll containers) e.g. enableDrag(true)
+    {
+      div = dragContainer.getElementsByTagName('div');
+    }    
+    else if (typeof(el) === 'string')                                                 // "el" is string (CSS selector) - it can collect one DIV element (like "#d12") or many DIV elements (like "#drag1 div")
+    {
+      div = document.querySelectorAll(el);
+    }
+    else if (typeof(el) === 'object' && (el.nodeName !== 'DIV' || el.className.indexOf('redips-drag') === -1))      // "el" is node reference to element that is not DIV class="redips-drag"
+    {
+      div = el.getElementsByTagName('div');
+    }
+    else                                                                              // none of above, el is DIV class="redips-drag", so prepare array with one DIV element
+    {
+      div[0] = el;
+    }
+    
+    enableDivs(enable_flag, div);
+  };
+  
+  
+  enableDivs = function(enable_flag, div)
+  {
+     var i, j, k,    // local variables used in loop
       tbls = [],    // collection of tables inside scrollable container
       borderStyle,  // border style (solid or dotted)
       opacity,    // (integer) set opacity for enabled / disabled elements
@@ -1728,104 +1753,80 @@ REDIPS.drag = (function ()
       cb,       // box offset for container box (cb)
       position,   // if table container has position:fixed then "page scroll" offset should not be added
       regexDrag = /\bredips-drag\b/i, // regular expression to search "redips-drag" class name
-      regexNoAutoscroll = /\bredips-noautoscroll\b/i; // regular expression to search "redips-noautoscroll" class name
-    // set opacity for disabled elements from public property "opacityDisabled"
-    opacity = REDIPS.drag.style.opacityDisabled;
-    // set styles for enabled DIV element
-    if (enable_flag === true || enable_flag === 'init') {
+      regexNoAutoscroll = /\bredips-noautoscroll\b/i; // regular expression to search "redips-noautoscroll" class name   
+
+    opacity = REDIPS.drag.style.opacityDisabled;                                      // set opacity for disabled elements from public property "opacityDisabled"
+    
+    if (enable_flag === true || enable_flag === 'init')                               // set styles for enabled DIV element
+    {
       borderStyle = REDIPS.drag.style.borderEnabled;
       cursor = 'move';
       enabled = true;
     }
-    // else set styles for disabled DIV element
-    else {
+    else                                                                              // else set styles for disabled DIV element
+    {
       borderStyle = REDIPS.drag.style.borderDisabled;
       cursor = 'auto';
       enabled = false;
-    }
-    // collect DIV elements inside current drag area (drag elements and scroll containers)
-    // e.g. enableDrag(true)
-    if (el === undefined) {
-      div = dragContainer.getElementsByTagName('div');
-    }
-    // "el" is string (CSS selector) - it can collect one DIV element (like "#d12") or many DIV elements (like "#drag1 div")
-    else if (typeof(el) === 'string') {
-      div = document.querySelectorAll(el);
-    }
-    // "el" is node reference to element that is not DIV class="redips-drag"
-    else if (typeof(el) === 'object' && (el.nodeName !== 'DIV' || el.className.indexOf('redips-drag') === -1)) {
-      div = el.getElementsByTagName('div');
-    }
-    // none of above, el is DIV class="redips-drag", so prepare array with one DIV element
-    else {
-      div[0] = el;
-    }
-    //
-    // main loop that goes through all DIV elements
-    //
-    for (i = 0, j = 0; i < div.length; i++) {
-      // if DIV element contains "redips-drag" class name
-      if (regexDrag.test(div[i].className)) {
-        // add reference to the DIV container (initialization or newly added element to the table)
-        // this property should not be changed in later element enable/disable
-        if (enable_flag === 'init' || div[i].redips === undefined) {
-          // create a "property object" in which all custom properties will be saved
-          div[i].redips = {};
+    }    
+    
+    for (i = 0, j = 0; i < div.length; i++)                                           // main loop that goes through all DIV elements
+    {    
+      if (regexDrag.test(div[i].className))                                           // if DIV element contains "redips-drag" class name
+      {
+        if (enable_flag === 'init' || div[i].redips === undefined)                    // add reference to the DIV container (initialization or newly added element to the table) this property should not be changed in later element enable/disable
+        {
+          div[i].redips = {};                                                         // create a "property object" in which all custom properties will be saved
           div[i].redips.container = dragContainer;
         }
-        // remove opacity mask
-        else if (enable_flag === true && typeof(opacity) === 'number') {
+        else if (enable_flag === true && typeof(opacity) === 'number')                // remove opacity mask
+        {
           div[i].style.opacity = '';
           div[i].style.filter = '';
         }
-        // set opacity for disabled elements
-        else if (enable_flag === false && typeof(opacity) === 'number') {
+        else if (enable_flag === false && typeof(opacity) === 'number')               // set opacity for disabled elements
+        {
           div[i].style.opacity = opacity / 100;
           div[i].style.filter = 'alpha(opacity=' + opacity + ')';
         }
-        // register event listener for DIV element
-        registerEvents(div[i], enabled);
-        // set styles for DIV element
-        div[i].style.borderStyle = borderStyle;
+        
+        registerEvents(div[i], enabled);                                              // register event listener for DIV element
+        
+        div[i].style.borderStyle = borderStyle;                                       // set styles for DIV element
         div[i].style.cursor = cursor;
-        // add enabled property to the DIV element (true or false)
-        div[i].redips.enabled = enabled;
+        div[i].redips.enabled = enabled;                                              // add enabled property to the DIV element (true or false)
       }
-      // attach onscroll event to the DIV element in init phase only if DIV element has overflow other than default value 'visible'
-      // and that means scrollable DIV container
-      else if (enable_flag === 'init') {
-        // ask for overflow style
-        overflow = getStyle(div[i], 'overflow');
-        // if DIV is scrollable
-        if (overflow !== 'visible') {
-          // define onscroll event handler for scrollable container
-          REDIPS.event.add(div[i], 'scroll', calculateCells);
-          // set container box style position (to exclude page scroll offset from calculation if needed)
-          position = getStyle(div[i], 'position');
-          // get DIV container offset with or without "page scroll" and excluded scroll position of the content
-          cb = boxOffset(div[i], position, false);
-          // search for redips-noautoscroll option
-          autoscroll = !regexNoAutoscroll.test(div[i].className);
-          // prepare scrollable container areas
-          scrollData.container[j] = {
-            div : div[i],         // reference to the scrollable container
-            offset : cb,          // box offset of the scrollable container
+      else if (enable_flag === 'init')                                                // attach onscroll event to the DIV element in init phase only if DIV element has overflow other than default value 'visible' and that means scrollable DIV container
+      {
+        overflow = getStyle(div[i], 'overflow');                                      // ask for overflow style
+        
+        if (overflow !== 'visible')                                                   // if DIV is scrollable
+        {
+          REDIPS.event.add(div[i], 'scroll', calculateCells);                         // define onscroll event handler for scrollable container
+          position = getStyle(div[i], 'position');                                    // set container box style position (to exclude page scroll offset from calculation if needed)
+          cb = boxOffset(div[i], position, false);                                    // get DIV container offset with or without "page scroll" and excluded scroll position of the content
+          autoscroll = !regexNoAutoscroll.test(div[i].className);                     // search for redips-noautoscroll option
+          
+          scrollData.container[j] =                                                   // prepare scrollable container areas
+          {
+            div : div[i],                 // reference to the scrollable container
+            offset : cb,                  // box offset of the scrollable container
             midstX : (cb[1] + cb[3]) / 2, // middle X
             midstY : (cb[0] + cb[2]) / 2, // middle Y
-            autoscroll : autoscroll     // autoscroll enabled or disabled (true or false)
+            autoscroll : autoscroll       // autoscroll enabled or disabled (true or false)
           };
-          // search for tables inside scrollable container
-          tbls = div[i].getElementsByTagName('table');
-          // loop goes through found tables inside scrollable area
-          for (k = 0; k < tbls.length; k++) {
-            // add a reference to the corresponding scrollable area
-            tbls[k].sca = scrollData.container[j];
+          
+          tbls = div[i].getElementsByTagName('table');                                // search for tables inside scrollable container
+          
+          for (k = 0; k < tbls.length; k++)                                           // loop goes through found tables inside scrollable area
+          {
+            tbls[k].sca = scrollData.container[j];                                    // add a reference to the corresponding scrollable area
           }
-          // increase scrollable container counter
-          j++;
+          
+          j++;                                                                        // increase scrollable container counter
         }
       }
-    }
+    }   
   };
 
 
@@ -2405,6 +2406,7 @@ REDIPS.drag = (function ()
     init : init,
     initTables : initTables,
     enableDrag : enableDrag,
+    enableDivs : enableDivs,
     relocate : relocate,
     emptyCell : emptyCell,
     deleteObject : deleteObject,
