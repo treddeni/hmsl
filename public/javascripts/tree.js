@@ -48,11 +48,9 @@ $(document).ready(function()
 {
   tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree'));     //get the tree model from the server
 
-  setUniqueIDs(tree.nodes);                                               //TODO: temp hack to make sure the node ids are unique
-
   $("#redips-drag").html(generateMarkup(tree, fields));                   //append the markup to the DOM
 
-  redips.init();
+  redips.init();                                                          //initialize tree drag/drop library
 
 
   refreshDataModelDisplay();
@@ -62,18 +60,6 @@ var saveToDatabase = function()
 {
   $.ajax({ type: 'POST', url: '/api/posts/tree', dataType: 'json', data: {json:JSON.stringify(tree)} });
 };
-
-function setUniqueIDs(nodes)
-{
-  if(nodes)
-  {
-    for(var i = 0; i < nodes.length; i++)
-    {
-      nodes[i].id = uid++;
-      setUniqueIDs(nodes[i].nodes);
-    }
-  }
-}
 
 var refreshDataModelDisplay = function()
 {
@@ -192,6 +178,8 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
       }
     }
   }
+  
+  //TODO: if the old parent is childless now, then hide the old parent's expand/collapse icon
 
   newParentNode.nodes.push(movedNode);                                                        //add moved node to it's new parent in the model
 
@@ -310,6 +298,45 @@ var findParent = function(nodeID, node, parent)
   }
 };
 
+var deleteNode = function(el)
+{
+  var row = getAncestorTag(el, 'tr');
+  var nodeID = parseInt(row.id.replace('rowid', ''));
+  var node = findNodeInTree(nodeID);
+  var parentNode = findParentInTree(nodeID);
+  
+  //remove the node from the view
+  removeNodeRow(node);
+  
+  //TODO: if parent is childless now, then hide the parent's expand/collapse icon 
+  
+  //remove the node from the model
+  for(var i = 0; i < parentNode.nodes.length; i++)
+  {
+    if(parentNode.nodes[i].id == nodeID)
+    {
+      parentNode.nodes.splice(i, 1);
+      break;
+    }
+  }
+  
+  refreshDataModelDisplay();                                                        //TODO: temp for displaying the model on the page for debugging purposes
+};
+
+var removeNodeRow = function(node)
+{
+  var row = document.getElementById('rowid' + node.id);
+  $(row).remove();
+  
+  if(node.nodes && node.nodes.length > 0)
+  {
+    for(var i = 0; i < node.nodes.length; i++)
+    {
+      removeNodeRow(node.nodes[i]);
+    }
+  }
+};
+
 var copyNode = function(source)
 {
   var sourceRow = getAncestorTag(source, 'tr');
@@ -324,10 +351,10 @@ var copyNode = function(source)
   var nodeIndex = getNodeIndex(sourceParentNode.nodes, sourceNode.id);              //TODO: handle case where the user tries to copy a top level node
   sourceParentNode.nodes.splice(nodeIndex, 0, newNode);
   
-  var newRow = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
-  $(newRow).insertBefore(sourceRow);
-  var newRowObj = document.getElementById('rowid' + newNode.id);
-  REDIPS.drag.enableDivs('init', newRowObj.getElementsByTagName('div'));
+  var newRowMarkup = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
+  $(newRowMarkup).insertBefore(sourceRow);
+  var newRow = document.getElementById('rowid' + newNode.id);
+  REDIPS.drag.enableDivs('init', newRow.getElementsByTagName('div'));
   
   refreshDataModelDisplay();                                                        //TODO: temp for displaying the model on the page for debugging purposes
 };
@@ -343,12 +370,6 @@ var assignNewNodeIDs = function(node)
       assignNewNodeIDs(node.nodes[i]);
     }
   }
-};
-
-var setRowNodeID = function(row, id)
-{
-  row.id = 'rowid' + id;
-  console.log(row.getElementById('expandID' + id));
 };
 
 var getNodeIndex = function(nodes, id)
