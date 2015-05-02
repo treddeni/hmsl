@@ -32,12 +32,12 @@ router.get('/api/posts/fields', function(req, res, next) {
 router.post('/api/posts/tree', function(req, res)
 {
   console.log('post received');
-  console.log(req.body);
+  console.log(req.body.json);
 
   mongo.connect('mongodb://localhost/tree', function (err, db) {
     console.log('mongodb connected');
     db.collection('tree').remove();
-    db.collection('tree').insert(req.body, function(err, inserted) { if(err) throw err; console.log('success?: ' + inserted); });
+    db.collection('tree').insert(JSON.parse(req.body.json), function(err, inserted) { if(err) throw err; console.log('success?: ' + inserted); });
     console.log('inserted in db');
   });
 
@@ -52,7 +52,7 @@ router.post('/api/posts/fields', function(req, res)
   mongo.connect('mongodb://localhost/tree', function (err, db) {
     console.log('mongodb connected');
     db.collection('fields').remove();
-    db.collection('fields').insert(req.body, function(err, inserted) { if(err) throw err; console.log('success?: ' + inserted); });
+    db.collection('fields').insert(req.body.json, function(err, inserted) { if(err) throw err; console.log('success?: ' + inserted); });
     console.log('inserted in db');
   });
 

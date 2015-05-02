@@ -1,9 +1,10 @@
+/// <reference path="../../typings/jquery/jquery.d.ts"/>
 var markup;
 var uid = 1;
 var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
-//var tree;
+var tree;
 
-var tree = { "project-id": 1001, "project-name": "Test", "nextNodeID": 5, "nodes": [{
+/*var tree = { "project-id": 1001, "project-name": "Test", "nextNodeID": 5, "nodes": [{
   "id": 1,
   "name": "node1",
   "values":
@@ -35,7 +36,7 @@ var tree = { "project-id": 1001, "project-name": "Test", "nextNodeID": 5, "nodes
       "nodes": []
     }
   ]
-}]};
+}]};*/
 
 var MIN_COLUMN_WIDTH = 70;
 var GRIPS_WIDTH = 16;
@@ -45,7 +46,7 @@ var resizeField = '0';
 
 $(document).ready(function()
 {
-  //tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree'));     //get the tree model from the server
+  tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree'));     //get the tree model from the server
 
   setUniqueIDs(tree.nodes);                                               //TODO: temp hack to make sure the node ids are unique
 
@@ -56,6 +57,11 @@ $(document).ready(function()
 
   refreshDataModelDisplay();
 });
+
+var saveToDatabase = function()
+{
+  $.ajax({ type: 'POST', url: '/api/posts/tree', dataType: 'json', data: {json:JSON.stringify(tree)} });
+};
 
 function setUniqueIDs(nodes)
 {
