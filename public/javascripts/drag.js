@@ -31,12 +31,6 @@ redips.init = function ()
     rd.rowOpacity(rd.objOld, 100);                // make source row completely visible (no opacity)
   };
 
-  rd.event.rowChanged = function ()
-  {
-    //var pos = rd.getPosition();                   // get target and source position (method returns positions as array)
-    //console.log('Changed: ' + pos[0]);          // display current table and current row
-  };
-
   rd.event.rowMoved = function ()
   {
     rd.rowOpacity(rd.obj, 85);                    // set opacity for moved row, rd.obj is reference of cloned row (mini table)

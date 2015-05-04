@@ -14,7 +14,6 @@ REDIPS.drag = (function ()
     handlerOnMouseUp,     // onmouseup handler
     handlerOnMouseMove,     // onmousemove handler for the document level
     elementDrop,        // drop element to the table cell
-    elementDeleted,       // actions needed after element is deleted (call event handler, updatig, climit1_X or climit2_X classnames, content shifting ...)
     resetStyles,        // reset object styles after element is dropped
     registerEvents,       // register event listeners for DIV element
     cellChanged,        // private method called from handlerOnMouseMove(), autoScrollX(), autoScrollY()
@@ -30,21 +29,13 @@ REDIPS.drag = (function ()
     autoScrollY,        // vertical auto scroll function
     copyProperties,       // method copies custom properties from source element to the cloned element.
     cloneLimit,         // clone limit (after cloning object, take care about climit1_X or climit2_X classnames)
-    elementControl,       // method returns true or false if element needs to have control
     getStyle,         // method returns style value of requested object and style name
     findParent,         // method returns a reference of the required parent element
-    findCell,         // method returns first or last cell: rowIndex, cellIndex and cell reference (input is "first" or "last" parameter and table or object within table)
     relocate,         // relocate objects from source cell to the target cell (source and target cells are input parameters)
-    emptyCell,          // method removes elements from table cell
-    cellList,         // method returns cell list with new coordinates (it takes care about rowspan/colspan cells)
-    deleteObject,       // method deletes DIV element
-    getPosition,        // returns position in format: tableIndex, rowIndex and cellIndex (input parameter is optional)
     rowOpacity,         // method sets opacity to table row (el, opacity, color)
-    rowEmpty,         // method marks selected row as empty (input parameters are table index and row index)
     rowClone,         // clone table row - input parameter is DIV with class name "redips-row" -> DIV class="redips-drag redips-row"
     rowDrop,          // function drops (delete old & insert new) table row (input parameters are current table and row)
     normalize,          // private method returns normalized spaces from input string
-    getRowTop,
 
     // private parameters
     objMargin = null,     // space from clicked point to the object bounds (top, right, bottom, left)
@@ -156,14 +147,9 @@ REDIPS.drag = (function ()
    * @function
    * @name REDIPS.drag#init
    */
-  init = function (dc)
+  init = function ()
   {
-    if (dc === undefined || typeof(dc) !== 'string')                  // if drag container is undefined or input parameter is not a string, then set reference to DIV element with default id="redips-drag"
-    {
-      dc = 'redips-drag';
-    }
-
-    dragContainer = document.getElementById(dc);                      // set reference to the drag container
+    dragContainer = document.getElementById('redips-drag');                      // set reference to the drag container
 
     windowScrollPosition = getScrollPosition();                       // set initial window scroll position
 
@@ -178,42 +164,20 @@ REDIPS.drag = (function ()
     }
 
     enableDrag('init', '.redips-drag');                                // attach onmousedown event handler to the DIV elements, attach onscroll='calculateCells' for DIV elements with 'scroll' in class name (prepare scrollable container areas)
-    initTables();                                                     // here was the following comment: "initTables should go after enableDrag because sca is attached to the table if table belongs to the scrollable container", not sure about order of enableDrag and initTable - needed some further testing
+    table = document.getElementById('treeTable');
+    table.redips = {};
 
     handlerOnResize();                                                // set initial window width/height, scroll width/height and define onresize event handler, onresize event handler calls calculate columns
     REDIPS.event.add(window, 'resize', handlerOnResize);
-
     REDIPS.event.add(window, 'scroll', calculateCells);               // attach onscroll event to the window (needed for recalculating table cells positions)
   };
 
 
-  initTables = function ()
-  {
-    table = document.getElementById('treeTable');
-
-    if(!table.redips)
-    {
-      table.redips = {};
-    }
-
-    table.redips.container = dragContainer;         // set redips.container to the table (needed in case when row is cloned)
-  };
-
-
-  /**
-   * onmousedown event handler.
-   * This event handler is attached to every DIV element in drag container (please see "enableDrag").
-   * @param {Event} e Event information.
-   * @see <a href="#enableDrag">enableDrag</a>
-   * @see <a href="#add_events">add_events</a>
-   * @private
-   * @memberOf REDIPS.drag#
-   */
+  // onmousedown event handler.  This event handler is attached to every DIV element in drag container (please see "enableDrag").
   handlerOnMouseDown = function (e)
   {
     var evt = e || window.event;          // define event (cross browser)
     var offset;                           // object offset
-    var mouseButton;                      // start drag if left mouse button is pressed
     var position;                         // position of table or container box of table (if has position:fixed then exclude scroll offset)
     var X, Y;                             // X and Y position of mouse pointer
 
@@ -224,20 +188,6 @@ REDIPS.drag = (function ()
     }
 
     shiftKey = evt.shiftKey;              // set true or false if shift key is pressed
-
-    if (evt.which)                        // define which mouse button was pressed
-    {
-      mouseButton = evt.which;
-    }
-    else
-    {
-      mouseButton = evt.button;
-    }
-
-    if (elementControl(evt) || (!evt.touches && mouseButton !== 1))     // exit from event handler if: 1) control should pass to form elements and links 2) device is not touch device and left mouse button is not pressed
-    {
-      return true;
-    }
 
     if (window.getSelection)                                            // remove text selection (Chrome, FF, Opera, Safari)
     {
@@ -262,7 +212,7 @@ REDIPS.drag = (function ()
 
     REDIPS.drag.obj = obj = rowClone(obj);                              // just return reference of the current row (do not clone)
 
-    //calculateCells();                                                 // if user has used a mouse event to increase the dimensions of the table - call calculateCells()
+    calculateCells();                                                 // if user has used a mouse event to increase the dimensions of the table - call calculateCells()
 
     row = cell = null;                                                  // reset row and cell indexes (needed in case of enable / disable tables)
     setTableRowColumn();                                                // set current table, row and cell and remember source position (old position is initially the same as source position)
@@ -286,13 +236,8 @@ REDIPS.drag = (function ()
 
     moved = cloned = false;                                             // reset "moved" flag (needed for clone object in handlerOnMouseMove) and "cloned" flag
 
-    REDIPS.event.add(document, 'mousemove', handlerOnMouseMove);        // activate onmousemove and ontouchmove event handlers on document object
-    REDIPS.event.add(document, 'mouseup', handlerOnMouseUp);            // activate onmouseup and ontouchend event handlers on document object
-
-    if (obj.setCapture)                                                 // get IE (all versions) to allow dragging outside the window (?!) - http://stackoverflow.com/questions/1685326/responding-to-the-onmousemove-event-outside-of-the-browser-window-in-ie
-    {
-      obj.setCapture();
-    }
+    REDIPS.event.add(document, 'mousemove', handlerOnMouseMove);        // activate onmousemove event handler on document object
+    REDIPS.event.add(document, 'mouseup', handlerOnMouseUp);            // activate onmouseup event handler on document object
 
     if (table !== null && row !== null && cell !== null)                // remember background color if is possible
     {
@@ -327,10 +272,6 @@ REDIPS.drag = (function ()
    * </ul>
    * @param {HTMLElement} el DIV class="redips-row" or TR (current row)
    * @return {HTMLElement} Returns reference of the current row or clone current row and return reference of the cloned row.
-   * @see <a href="#handlerOnMouseDown">handlerOnMouseDown</a>
-   * @see <a href="#handlerOnMouseMove">handlerOnMouseMove</a>
-   * @private
-   * @memberOf REDIPS.drag#
    */
   rowClone = function (el)
   {
@@ -372,9 +313,6 @@ REDIPS.drag = (function ()
    * @param {Integer} tableIdx Table index.
    * @param {Integer} rowIdx Row index.
    * @param {HTMLElement} [tableMini] Reference to the mini table (table that contains only one row). This is actually clone of source row.
-   * @see <a href="#rowClone">rowClone</a>
-   * @private
-   * @memberOf REDIPS.drag#
    */
   rowDrop = function (rowIdx, tableMini)
   {
@@ -434,11 +372,6 @@ REDIPS.drag = (function ()
 
       delete trMini.redips.emptyRow;                                                            // delete emptyRow property from inserted/appended row because emptyRow will be set on next move, copyProperties() in rowClone() copied emptyRow property to the row in tableMini, otherwise row will be overwritten and that is not good
       REDIPS.drag.event.rowDropped(tableRow);         // call rowDropped event handler
-
-      if (trMini.getElementsByTagName('table').length > 0)                                      // if row contains TABLE(S) then recall initTables() to properly initialize tables array and set custom properties, no matter if row was moved or deleted
-      {
-        initTables();
-      }
     }
     else                                                                                        // event.rowDroppedBefore() returned "false" (it's up to user to return source row opacity to its original state)
     {
@@ -452,9 +385,6 @@ REDIPS.drag = (function ()
    * handlerOnMouseUp is attached to the DIV element in a moment when DIV element is clicked (this happens in handlerOnMouseDown).
    * This event handler detaches onmousemove and onmouseup event handlers.
    * @param {Event} e Event information.
-   * @see <a href="#handlerOnMouseDown">handlerOnMouseDown</a>
-   * @private
-   * @memberOf REDIPS.drag#
    */
   handlerOnMouseUp = function (e)
   {
@@ -470,11 +400,6 @@ REDIPS.drag = (function ()
 
     edge.flag.x = edge.flag.y = 0;                                              // turn off autoscroll "current cell" handling (if user mouseup in the middle of autoscrolling)
 
-    if (obj.releaseCapture)                                                     // remove mouse capture from the object in the current document, get IE (all versions) to allow dragging outside the window (?!), http://stackoverflow.com/questions/1685326/responding-to-the-onmousemove-event-outside-of-the-browser-window-in-ie
-    {
-      obj.releaseCapture();
-    }
-
     REDIPS.event.remove(document, 'mousemove', handlerOnMouseMove);
     REDIPS.event.remove(document, 'mouseup', handlerOnMouseUp);
 
@@ -482,7 +407,6 @@ REDIPS.drag = (function ()
 
     resetStyles(obj);                                                           // reset object styles
 
-    // document.body.scroll... only works in compatibility (aka quirks) mode, for standard mode, use: document.documentElement.scroll...
     scrollData.width  = document.documentElement.scrollWidth;
     scrollData.height = document.documentElement.scrollHeight;
 
@@ -534,24 +458,21 @@ REDIPS.drag = (function ()
           rowDrop(r_row);
         }
       }
-      // clicked element was not moved - DIV element didn't cross threshold value
-      // just call event.notMoved event handler
-      if (!cloned && !threshold.flag)
+      
+      if (!cloned && !threshold.flag)                                           // clicked element was not moved - DIV element didn't cross threshold value, just call event.notMoved event handler
       {
         REDIPS.drag.event.notMoved();
       }
       else if (cloned && row_source === row && cell_source === cell)            // delete cloned element if dropped on the start position
       {
         obj.parentNode.removeChild(obj);
-        // decrease clonedId counter
         clonedId[objOld.id] -= 1;
         REDIPS.drag.event.notCloned();
       }
-      // delete cloned element if dropped outside current table and clone.drop is set to false
-      else if (cloned && REDIPS.drag.clone.drop === false && (X < table.redips.offset[3] || X > table.redips.offset[1] || Y < table.redips.offset[0] || Y > table.redips.offset[2]))
+      else if (cloned && REDIPS.drag.clone.drop === false && (X < table.redips.offset[3] || X > table.redips.offset[1] || Y < table.redips.offset[0] || Y > table.redips.offset[2]))    // delete cloned element if dropped outside current table and clone.drop is set to false
       {
         obj.parentNode.removeChild(obj);
-        clonedId[objOld.id] -= 1;                                               // decrease clonedId counter
+        clonedId[objOld.id] -= 1;
         REDIPS.drag.event.notCloned();
       }
       else                                                                      // else call event.droppedBefore(), append object to the cell and call event.dropped()
@@ -572,66 +493,60 @@ REDIPS.drag = (function ()
    * Element drop. This method is called from handlerOnMouseUp and appends element to the target table cell.
    * If input parameter "drop" is set to "false" (this is actually return value from event.droppedBefore) then DIV elements will not be dropped (only cloned element will be deleted).
    * @param {Boolean} [drop] If not "false" then DIV element will be dropped to the cell.
-   * @private
-   * @memberOf REDIPS.drag#
    */
-  elementDrop = function (drop) {
-    var cloneSourceDiv = null,  // clone source element (needed if clone.sendBack is set to true)
-      div,          // nodeList of DIV elements in target cell (needed if clone.sendBack is set to true)
-      i;            // local variables
-    // if input parameter is not "false" then DIV element will be dropped to the table cell
-    if (drop !== false) {
-      // if clone.sendBack is set to true then try to find source element in target cell
-      if (clone.sendBack === true) {
-        // search all DIV elements in target cell
-        div = td.target.getElementsByTagName('DIV');
-        // loop through all DIV elements in target cell
-        for (i = 0; i < div.length; i++) {
+  elementDrop = function (drop) 
+  {
+    var cloneSourceDiv = null;                                        // clone source element (needed if clone.sendBack is set to true)
+    var div;                                                          // nodeList of DIV elements in target cell (needed if clone.sendBack is set to true)
+    
+    if (drop !== false)                                               // if input parameter is not "false" then DIV element will be dropped to the table cell
+    {
+      if (clone.sendBack === true)                                    // if clone.sendBack is set to true then try to find source element in target cell
+      {
+        div = td.target.getElementsByTagName('DIV');                  // search all DIV elements in target cell
+        
+        for (var i = 0; i < div.length; i++)                          // loop through all DIV elements in target cell
+        {
           // if DIV in target cell is source of dropped DIV element (dropped DIV id and id of DIV in target cell has the same name beginning like "d12c2" and "d12")
           // of course, the case where source DIV element is dropped to the cell with cloned DIV element should be excluded (possible in climit1 type)
-          if (obj !== div[i] && obj.id.indexOf(div[i].id) === 0) {
-            // set reference to cloneSourceDiv element
-            cloneSourceDiv = div[i];
-            // break the loop
+          if (obj !== div[i] && obj.id.indexOf(div[i].id) === 0) 
+          {
+            cloneSourceDiv = div[i];                                  // set reference to cloneSourceDiv element
             break;
           }
         }
-        // if clone source DIV element exists in target cell
-        if (cloneSourceDiv) {
-          // update climit class (increment by 1)
-          cloneLimit(cloneSourceDiv, 1);
-          // delete dropped DIV element
-          obj.parentNode.removeChild(obj);
-          // return from the method (everything is done)
-          return;
+        
+        if (cloneSourceDiv)                                           // if clone source DIV element exists in target cell
+        {
+          cloneLimit(cloneSourceDiv, 1);                              // update climit class (increment by 1)
+          obj.parentNode.removeChild(obj);                            // delete dropped DIV element
+          return;                                                     // return from the method (everything is done)
         }
       }
 
-      // insert (to top) or append (to bottom) object to the target cell
-      if (REDIPS.drag.multipleDrop === 'top' && td.target.hasChildNodes()) {
+      if (REDIPS.drag.multipleDrop === 'top' && td.target.hasChildNodes())            // insert (to top) or append (to bottom) object to the target cell
+      {
         td.target.insertBefore(obj, td.target.firstChild);
       }
-      else {
+      else 
+      {
         td.target.appendChild(obj);
       }
-      // register event listeners (FIX for Safari Mobile)
-      registerEvents(obj);
-      // call event.dropped because cloneLimit could call event.clonedEnd1 or event.clonedEnd2
-      REDIPS.drag.event.dropped(td.target);
-      // if object is cloned
-      if (cloned) {
-        // call clonedDropped event handler
-        REDIPS.drag.event.clonedDropped(td.target);
-        // update climit1_X or climit2_X classname
-        cloneLimit(objOld, -1);
+      
+      registerEvents(obj);                                                            // register event listeners (FIX for Safari Mobile)
+      REDIPS.drag.event.dropped(td.target);                                           // call event.dropped because cloneLimit could call event.clonedEnd1 or event.clonedEnd2
+      
+      if (cloned)                                                                     // if object is cloned
+      {
+        REDIPS.drag.event.clonedDropped(td.target);                                   // call clonedDropped event handler
+        cloneLimit(objOld, -1);                                                       // update climit1_X or climit2_X classname
       }
     }
-    // cloned element should be deleted (if not already deleted)
-    else if (cloned && obj.parentNode) {
+    else if (cloned && obj.parentNode)                                                // cloned element should be deleted (if not already deleted)
+    {
       obj.parentNode.removeChild(obj);
     }
   };
-
 
   /**
    * Register event listeners for DIV element.
@@ -641,8 +556,6 @@ REDIPS.drag = (function ()
    * It looks like selected text was able to drag instead of DIV element.
    * @param {HTMLElement} div Register event listeners for onmousedown, ontouchstart and ondblclick to the DIV element.
    * @param {Boolean} [flag] If set to false then event listeners will be deleted.
-   * @private
-   * @memberOf REDIPS.drag#
    */
   registerEvents = function (div, flag)
   {
@@ -665,19 +578,6 @@ REDIPS.drag = (function ()
     el.style.zIndex = '';
   };
 
-
-  // Actions needed after element is deleted. This function is called from handlerOnMouseUp. Function deletes element and calls event handlers.
-  elementDeleted = function ()
-  {
-    if (cloned)                                   // if object is cloned, update climit1_X or climit2_X classname
-    {
-      cloneLimit(objOld, -1);
-    }
-
-    REDIPS.drag.event.deleted(cloned);            // call event.deleted() method and send cloned flag
-  };
-
-
   /**
    * onmousemove event handler.
    * handlerOnMouseMove is attached to document level in a moment when DIV element is clicked (this happens in handlerOnMouseDown).
@@ -685,8 +585,6 @@ REDIPS.drag = (function ()
    * @param {Event} e Event information.
    * @see <a href="#handlerOnMouseDown">handlerOnMouseDown</a>
    * @see <a href="#handlerOnMouseUp">handlerOnMouseUp</a>
-   * @private
-   * @memberOf REDIPS.drag#
    */
   handlerOnMouseMove = function (e)
   {
@@ -716,13 +614,8 @@ REDIPS.drag = (function ()
       REDIPS.drag.obj = obj = rowClone(obj);    // clone source row and set as obj
       obj.style.zIndex = 999;                   // set high z-index for cloned mini table
 
-      if (obj.setCapture)                       // get IE (all versions) to allow dragging outside the window (?!) this was needed here also - despite setCaputure in onmousedown
-      {
-        obj.setCapture();
-      }
-
       obj.style.position = 'fixed';             // set style to fixed to allow dragging DIV object
-      //calculateCells();                       // call calculate cells for case where moved element changed cell dimension, place 3 elements in the same cell in example08 and try to move one out of the table cell
+      calculateCells();                       // call calculate cells for case where moved element changed cell dimension, place 3 elements in the same cell in example08 and try to move one out of the table cell
       setTableRowColumn();                      // set current table, row and column
 
       if (cloned)                               // call event handler (row cloned/moved)
@@ -734,7 +627,7 @@ REDIPS.drag = (function ()
         REDIPS.drag.event.rowMoved();
       }
 
-      setPosition();                          // set color for the current table cell and remember previous position and color setPosition() must go after calling event.moved() and event.rowMoved() if user wants to change color of source row
+      setPosition();                          // set color for the current table cell and remember previous position and color, setPosition() must go after calling event.moved() and event.rowMoved() if user wants to change color of source row
 
       if (X > screen.width - objMargin[1])    // if element is far away on the right side of page, set possible right position (screen.width - object width), objMargin[1] + objMargin[3] = object width
       {
@@ -888,7 +781,8 @@ REDIPS.drag = (function ()
     // stop all propagation of the event in the bubbling phase.
     // (save system resources by turning off event bubbling / propagation)
     evt.cancelBubble = true;
-    if (evt.stopPropagation) {
+    if (evt.stopPropagation) 
+    {
       evt.stopPropagation();
     }
   };
@@ -897,11 +791,6 @@ REDIPS.drag = (function ()
   /**
    * This method is called (from handlerOnMouseMove, autoScrollX, autoScrollY) in case of change of current table cell.
    * When change happens, then return background color to old position, highlight new position, calculate cell boundaries and call event.changed.
-   * @see <a href="#handlerOnMouseMove">handlerOnMouseMove</a>
-   * @see <a href="#autoScrollX">autoScrollX</a>
-   * @see <a href="#autoScrollY">autoScrollY</a>
-   * @private
-   * @memberOf REDIPS.drag#
    */
   cellChanged = function () {
     if ((row !== row_old || cell !== cell_old)) {
@@ -925,41 +814,20 @@ REDIPS.drag = (function ()
     }
   };
 
-
-  /**
-   * In initialization phase, this method is attached as onresize event handler for window.
-   * It also calculates window width and window height. Result is saved in variables screen.width and screen.height visible inside REDIPS.drag private scope.
-   * @see <a href="#init">init</a>
-   * @private
-   * @memberOf REDIPS.drag#
-   */
-  handlerOnResize = function () {
-    // Non-IE
-    if (typeof(window.innerWidth) === 'number') {
-      screen.width  = window.innerWidth;
-      screen.height = window.innerHeight;
-    }
-    // IE 6+ in 'standards compliant mode'
-    else if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) {
-      screen.width  = document.documentElement.clientWidth;
-      screen.height = document.documentElement.clientHeight;
-    }
-    // set scroll size (onresize, onload and onmouseup event)
-    scrollData.width  = document.documentElement.scrollWidth;
+  // In initialization phase, this method is attached as onresize event handler for window.  It also calculates window width and window height. Result is saved in variables screen.width and screen.height visible inside REDIPS.drag private scope.
+  handlerOnResize = function () 
+  {
+    screen.width  = window.innerWidth;
+    screen.height = window.innerHeight;
+    
+    scrollData.width  = document.documentElement.scrollWidth;     // set scroll size (onresize, onload and onmouseup event)
     scrollData.height = document.documentElement.scrollHeight;
-    // calculate colums and rows offset (cells dimensions)
-    calculateCells();
+    
+    calculateCells();                                             // calculate colums and rows offset (cells dimensions)
   };
 
-
-  /**
-   * Method sets current row and cell.
-   * Current cell position is based on position of mouse pointer and calculated grid of tables inside drag container.
-   * Method contains logic for dropping rules like marked/forbidden table cells.
-   * Rows with display='none' are not contained in row_offset array so row bounds calculation should take care about sparse arrays (since version 4.3.6).
-   * @private
-   * @memberOf REDIPS.drag#
-   */
+  // Method sets current row and cell.  Current cell position is based on position of mouse pointer and calculated grid of tables inside drag container.
+  // Rows with display='none' are not contained in row_offset array so row bounds calculation should take care about sparse arrays (since version 4.3.6).
   setTableRowColumn = function ()
   {
     var previous;       // set previous position (current cell will not be highlighted)
@@ -1058,29 +926,17 @@ REDIPS.drag = (function ()
     }
   };
 
-
-  /**
-   * Method sets background color for the current table cell and remembers previous position and background color.
-   * It is called from handlerOnMouseMove and cellChanged.
-   * @see <a href="#handlerOnMouseMove">handlerOnMouseMove</a>
-   * @see <a href="#cellChanged">cellChanged</a>
-   * @private
-   * @memberOf REDIPS.drag#
-   */
+  // Method sets background color for the current table cell and remembers previous position and background color.  It is called from handlerOnMouseMove and cellChanged.
   setPosition = function ()
   {
-    // in case if ordinary element is placed inside 'deny' table cell
-    if (row !== null && cell !== null) {
-      // remember background color before setting the new background color
-      bgStyleOld = getTdStyle(row, cell);
-      // highlight current TD / TR (colors and styles are read from public property "hover"
-      setTdStyle(row, cell);
-      // remember current position (for row and cell)
-      row_old = row;
+    if (row !== null && cell !== null)      // in case if ordinary element is placed inside 'deny' table cell
+    {
+      bgStyleOld = getTdStyle(row, cell);   // remember background color before setting the new background color
+      setTdStyle(row, cell);                // highlight current TD / TR (colors and styles are read from public property "hover"
+      row_old = row;                        // remember current position (for row and cell)
       cell_old = cell;
     }
   };
-
 
   /**
    * Method sets table cell(s) background styles (background colors and border styles).
@@ -1198,14 +1054,14 @@ REDIPS.drag = (function ()
    */
   boxOffset = function (box, position, box_scroll)
   {
-    var oLeft = 0;    // define offset left (take care of horizontal scroll position)
-    var oTop  = 0;    // define offset top (take care od vertical scroll position)
-    var boxOld = box; // remember box object
+    var oLeft = 0;                                                // define offset left (take care of horizontal scroll position)
+    var oTop  = 0;                                                // define offset top (take care od vertical scroll position)
+    var boxOld = box;                                             // remember box object
 
-    if (position !== 'fixed')               // if table_position is undefined, '' or 'page_scroll' then include page scroll offset, windowScrollPosition is set in calculateCells(), calculateCells() is called on window scroll event
+    if (position !== 'fixed')                                     // if table_position is undefined, '' or 'page_scroll' then include page scroll offset, windowScrollPosition is set in calculateCells(), calculateCells() is called on window scroll event
     {
-      oLeft = 0 - windowScrollPosition[0];  // define offset left (take care of horizontal scroll position)
-      oTop  = 0 - windowScrollPosition[1];  // define offset top (take care od vertical scroll position)
+      oLeft = 0 - windowScrollPosition[0];                        // define offset left (take care of horizontal scroll position)
+      oTop  = 0 - windowScrollPosition[1];                        // define offset top (take care od vertical scroll position)
     }
 
     if (box_scroll === undefined || box_scroll === true)          // climb up through DOM hierarchy (getScrollPosition() takes care about page scroll positions)
@@ -1232,38 +1088,6 @@ REDIPS.drag = (function ()
     //        top                 right,                     bottom           left
     return [ oTop, oLeft + boxOld.offsetWidth, oTop + boxOld.offsetHeight, oLeft ];
   };
-
-  getRowTop = function (box, position, box_scroll)
-  {
-    var oTop  = 0;    // define offset top (take care od vertical scroll position)
-
-    if (position !== 'fixed')               // if table_position is undefined, '' or 'page_scroll' then include page scroll offset, windowScrollPosition is set in calculateCells(), calculateCells() is called on window scroll event
-    {
-      oTop  = 0 - windowScrollPosition[1];  // define offset top (take care od vertical scroll position)
-    }
-
-    if (box_scroll === undefined || box_scroll === true)          // climb up through DOM hierarchy (getScrollPosition() takes care about page scroll positions)
-    {
-      do
-      {
-        oTop += box.offsetTop - box.scrollTop;
-        box = box.offsetParent;
-      }
-      while (box && box.nodeName !== 'BODY');
-    }
-    else                                                          // climb up to the BODY element but without scroll positions
-    {
-      do
-      {
-        oTop += box.offsetTop;
-        box = box.offsetParent;
-      }
-      while (box && box.nodeName !== 'BODY');
-    }
-
-    return oTop;
-  };
-
 
   /**
    * Method is called in every possible case when position or size of table grid could change like: page scrolling, element dropped to the table cell, element start dragging and so on.
@@ -1317,45 +1141,15 @@ REDIPS.drag = (function ()
     }
   };
 
-
-  /**
-   * Method returns current page scroll values as array (X and Y axis).
-   * @return {Array} Returns array with two values [ scrollX, scrollY ].
-   * @public
-   * @function
-   * @name REDIPS.drag#getScrollPosition
-   */
-  getScrollPosition = function () {
-    // define local scroll position variables
-    //var scrollX, scrollY;
-    // Netscape compliant
-    //if (typeof(window.pageYOffset) === 'number') {
-    //  scrollX = window.pageXOffset;
-    //  scrollY = window.pageYOffset;
-    //}
-    // DOM compliant
-    //else if (document.body && (document.body.scrollLeft || document.body.scrollTop)) {
-    //  scrollX = document.body.scrollLeft;
-    //  scrollY = document.body.scrollTop;
-    //}
-    // IE6 standards compliant mode
-    //else if (document.documentElement && (document.documentElement.scrollLeft || document.documentElement.scrollTop)) {
-    //  scrollX = document.documentElement.scrollLeft;
-    //  scrollY = document.documentElement.scrollTop;
-    //}
-    // needed for IE6 (when vertical scroll bar was on the top)
-    //else {
-    //  scrollX = scrollY = 0;
-    //}
-    // return scroll positions
-
+  // Method returns current page scroll values as array (X and Y axis).
+  getScrollPosition = function () 
+  {
     var scrollY = window.pageYOffset || document.documentElement.scrollTop;
     //var scrollX = window.pageXOffset || document.documentElement.scrollLeft;
     var scrollX = 0;
 
     return [ scrollX, scrollY ];
   };
-
 
   /**
    * Horizontal auto scroll method.
@@ -1637,54 +1431,6 @@ REDIPS.drag = (function ()
     }
   };
 
-
-  /**
-   * Method returns true or false if element needs to have control.
-   * Elements like A, INPUT, SELECT, OPTION, TEXTAREA should have its own control (method returns "true").
-   * If element contains "redips-nodrag" class name then dragging will be skipped (see example11 "Drag handle on titlebar").
-   * <ul>
-   * <li>true - click on element will not start dragging (element has its own control)</li>
-   * <li>false - click on element will start dragging</li>
-   * </ul>
-   * @param {Event} evt Event information.
-   * @return {Boolean} Returns true or false if element needs to have control.
-   * @private
-   * @memberOf REDIPS.drag#
-   */
-  elementControl = function (evt) {
-    // declare elementControl flag, source tag name and element classes
-    var flag = false,
-      srcName,
-      classes,            // class names of DIV element;
-      regexNodrag = /\bredips-nodrag\b/i; // regular expression to search "redips-nodrag" class name
-    // set source tag name and classes for IE and FF
-    if (evt.srcElement) {
-      srcName = evt.srcElement.nodeName;
-      classes = evt.srcElement.className;
-    }
-    else {
-      srcName = evt.target.nodeName;
-      classes = evt.target.className;
-    }
-    // set flag (true or false) for clicked elements
-    switch (srcName) {
-    case 'A':
-    case 'INPUT':
-    case 'SELECT':
-    case 'OPTION':
-    case 'TEXTAREA':
-      flag = true;
-      break;
-    // none of form elements
-    default:
-      // if element has "redips-nodrag" class name then dragging will be skipped
-      flag = regexNodrag.test(classes);
-    }
-    // return true/false flag
-    return flag;
-  };
-
-
   /**
    * Method attaches / detaches onmousedown, ontouchstart and ondblclick events to DIV elements and attaches onscroll event to the scroll containers in initialization phase.
    * It also can be used for element initialization after DIV element was manually added to the table.
@@ -1829,62 +1575,18 @@ REDIPS.drag = (function ()
     }   
   };
 
-
-  /**
-   * Method deletes DIV element from table.
-   * Input parameter is DIV reference or id of DIV element.
-   * @param {String|HTMLElement} el Id of DIV element or reference of DIV element that should be deleted.
-   * @example
-   * // delete DIV element in event.dropped() event handler
-   * rd.event.dropped = function () {
-   *     rd.deleteObject(rd.obj);
-   * }
-   *
-   * // delete DIV element with id="d1"
-   * rd.deleteObject('d1');
-   * @public
-   * @function
-   * @name REDIPS.drag#deleteObject
-   */
-  deleteObject = function (el) {
-    var div;
-    // if "el" is DIV reference then remove DIV element
-    if (typeof(el) === 'object' && el.nodeName === 'DIV') {
-      el.parentNode.removeChild(el);
+  //Method returns style value for requested HTML element and style name.
+  getStyle = function (el, style_name) 
+  {
+    if (el && el.currentStyle) 
+    {
+      return el.currentStyle[style_name];
     }
-    // else try to delete DIV element with its ID
-    else if (typeof(el) === 'string') {
-      // search for DIV element inside current drag area (drag elements and scrollable containers)
-      div = document.getElementById(el);
-      // if div element exists then it will be deleted
-      if (div) {
-        div.parentNode.removeChild(div);
-      }
+    else if (el && window.getComputedStyle) 
+    {
+      return document.defaultView.getComputedStyle(el, null)[style_name];
     }
   };
-
-
-  /**
-   * Method returns style value for requested HTML element and style name.
-   * @param {HTMLElement} el Requested HTML element.
-   * @param {String} style_name Asked style name.
-   * @return {String} Returns style value.
-   * @see <a href="http://www.quirksmode.org/dom/getstyles.html">http://www.quirksmode.org/dom/getstyles.html</a>
-   * @public
-   * @function
-   * @name REDIPS.drag#getStyle
-   */
-  getStyle = function (el, style_name) {
-    var val; // value of requested object and property
-    if (el && el.currentStyle) {
-      val = el.currentStyle[style_name];
-    }
-    else if (el && window.getComputedStyle) {
-      val = document.defaultView.getComputedStyle(el, null)[style_name];
-    }
-    return val;
-  };
-
 
   /**
    * Method returns a reference of the required parent element.
@@ -1897,304 +1599,46 @@ REDIPS.drag = (function ()
    *
    * // find reference of the outside table (start node is TD in inner table - first TABLE node should be skipped)
    * tbl = findParent('TABLE', cell, 1);
-   * @return {HTMLElement} Returns reference of the found parent element.
-   * @public
-   * @function
-   * @name REDIPS.drag#findParent
    */
-  findParent = function (tag_name, el, skip) {
-    // set "el" to the next node (to prevent finding node itself)
-    el = el.parentNode;
-    // if skip parameter is not defined then set it to 0
-    if (skip === undefined) {
+  findParent = function (tag_name, el, skip) 
+  {
+    el = el.parentNode;                 // set "el" to the next node (to prevent finding node itself)
+    
+    if (skip === undefined)             // if skip parameter is not defined then set it to 0
+    {
       skip = 0;
     }
-    // start loop
-    while (el) {
-      // node is found
-      if (el.nodeName === tag_name) {
-        // if node should be skipped then decrease counter
-        if (skip > 0) {
+    
+    while (el)                          // start loop
+    {
+      if (el.nodeName === tag_name)     // node is found
+      {
+        if (skip > 0)                   // if node should be skipped then decrease counter
+        {
           skip--;
         }
-        // node is found and loop can be ended
-        else {
+        else                            // node is found and loop can be ended
+        {
           break;
         }
       }
-      // move on to the parent node
-      el = el.parentNode;
+      
+      el = el.parentNode;               // move on to the parent node
     }
-      // return found element
-      return el;
+    
+    return el;
   };
 
-
-  /**
-   * Method returns data (cell reference, row index and column index) for first or last cell in table or row / column.
-   * @param {String} param Parameter defines first or last table cell (values are "first", "firstInColumn", "firstInRow", "last", "lastInColumn", "lastInRow").
-   * @param {HTMLElement} el Table cell reference (td). For "first" or "last" request, el can be any HTMLElement within table.
-   * @example
-   * // find first cell in row (el is table cell reference)
-   * firstInRow = findCell('firstInRow', el);
-   *
-   * // find last cell in table (el is reference of any cell inside table)
-   * last = findCell('last', el);
-   *
-   * // find last cell in column (el is table cell reference)
-   * lastInColumn = findCell('lastInColumn', el);
-   * @return {Array} Returns array with row index, column index and cell reference,
-   * @public
-   * @function
-   * @name REDIPS.drag#findCell
-   */
-  findCell = function (param, el) {
-    // find parent table (if "el" is already table then "el" reference will not change)
-    var tbl = findParent('TABLE', el),
-      ri, // row index
-      ci, // cell index
-      c;  // cell reference
-    switch (param) {
-    // first in column
-    case 'firstInColumn':
-      ri = 0;
-      ci = el.cellIndex;
-      break;
-    // first in row
-    case 'firstInRow':
-      ri = el.parentNode.rowIndex;
-      ci = 0;
-      break;
-    // last in column
-    case 'lastInColumn':
-      ri = tbl.rows.length - 1;
-      ci = el.cellIndex;
-      break;
-    // last in row (cell index for current row)
-    case 'lastInRow':
-      ri = el.parentNode.rowIndex;
-      ci = tbl.rows[ri].cells.length - 1;
-      break;
-    // last in table (cell index for last row)
-    case 'last':
-      ri = tbl.rows.length - 1;
-      ci = tbl.rows[ri].cells.length - 1;
-      break;
-    // define cell reference for first table cell (row and column indexes are 0)
-    default:
-      ri = ci = 0;
-    }
-    // set table cell reference
-    c = tbl.rows[ri].cells[ci];
-      // return cell data as array: row index, cell index and td reference
-      return [ri, ci, c];
-  };
-
-
-  /**
-   * Method tests TD if is empty or removes elements from table cell.
-   * Cell is considered as empty if does not contain any child nodes or if cell has only one text node.
-   * In other words, if cell contains only text then it will be treated as empty cell.
-   * @param {HTMLElement} tdElement Table cell to test or from which all the elements will be deleted.
-   * @param {String} [mode] If mode is set to "test" then method will only test TD and return true or false.
-   * @example
-   * // set REDIPS.drag reference
-   * var rd = REDIPS.drag;
-   * // search for TABLE element (from cell reference)
-   * tbl = rd.emptyCell(td);
-   *
-   * // how to test TD if cell is occupied
-   * var empty = rd.emptyCell(td, 'test');
-   * @return {Boolean|Array} Returns true/false depending on cell content or array with deleted child nodes.
-   * @public
-   * @function
-   * @name REDIPS.drag#emptyCell
-   */
-  emptyCell = function (tdElement, mode) {
-    var cn,     // number of child nodes
-      el = [],  // removed elements will be saved in array
-      flag,   // empty cell flag
-      i;      // loop variable
-    // td should be table cell element otherwise return undefined
-    if (tdElement.nodeName !== 'TD') {
-      return undefined;
-    }
-    // define childnodes length before loop (not in loop because NodeList objects in the DOM are live)
-    cn = tdElement.childNodes.length;
-    // if mode is set to "test" then check for cell content
-    if (mode === 'test') {
-      // in case of source cell, return undefined
-      if (td.source === tdElement) {
-        flag = undefined;
-      }
-      // cell without child nodes or if cell has only one node and that is text node then cell is empty
-      else {
-        flag = (tdElement.childNodes.length === 0 || (tdElement.childNodes.length === 1 && tdElement.firstChild.nodeType === 3));
-      }
-      // return empty flag state
-      return flag;
-    }
-    // otherwise delete all child nodes from td
-    else {
-      for (i = 0; i < cn; i++) {
-        // save node reference
-        el.push(tdElement.childNodes[0]);
-        // delete node
-        tdElement.removeChild(tdElement.childNodes[0]);
-      }
-      // return array with references od deleted nodes
-      return el;
-    }
-  };
-
-
-  /**
-   * Determining a table cell's X and Y position/index.
-   * @see <a href="http://www.javascripttoolbox.com/temp/table_cellindex.html">http://www.javascripttoolbox.com/temp/table_cellindex.html</a>
-   * @see <a href="http://www.barryvan.com.au/2012/03/determining-a-table-cells-x-and-y-positionindex/">http://www.barryvan.com.au/2012/03/determining-a-table-cells-x-and-y-positionindex/</a>
-   * @private
-   * @memberOf REDIPS.drag#
-   */
-  cellList = function (table) {
-    var matrix = [],
-      matrixrow,
-      lookup = {},
-      c,      // current cell
-      ri,     // row index
-      rowspan,
-      colspan,
-      firstAvailCol,
-      tr,     // TR collection
-      i, j, k, l; // loop variables
-    // set HTML collection of table rows
-    tr = table.rows;
-    // open loop for each TR element
-    for (i = 0; i < tr.length; i++) {
-      // open loop for each cell within current row
-      for (j = 0; j < tr[i].cells.length; j++) {
-        // define current cell
-        c = tr[i].cells[j];
-        // set row index
-        ri = c.parentNode.rowIndex;
-        // define cell rowspan and colspan values
-        rowspan = c.rowSpan || 1;
-        colspan = c.colSpan || 1;
-        // if matrix for row index is not defined then initialize array
-        matrix[ri] = matrix[ri] || [];
-        // find first available column in the first row
-        for (k = 0; k < matrix[ri].length + 1; k++) {
-          if (typeof(matrix[ri][k]) === 'undefined') {
-            firstAvailCol = k;
-            break;
-          }
-        }
-        // set cell coordinates and reference to the table cell
-        lookup[ri + '-' + firstAvailCol] = c;
-        // create a "property object" in which "real" row/cell index will be saved
-        if (c.redips === undefined) {
-          c.redips = {};
-        }
-        // save row and cell index to the cell
-        c.redips.rowIndex = ri;
-        c.redips.cellIndex = firstAvailCol;
-        for (k = ri; k < ri + rowspan; k++) {
-          matrix[k] = matrix[k] || [];
-          matrixrow = matrix[k];
-          for (l = firstAvailCol; l < firstAvailCol + colspan; l++) {
-            matrixrow[l] = 'x';
-          }
-        }
-      }
-    }
-    return lookup;
-  };
-
-
-  /**
-   * Method returns position as array with members tableIndex, rowIndex and cellIndex (array length is 3).
-   * If input parameter is not defined then method will return array with current and source positions (array length will be 6).
-   * @param {String|HTMLElement} [ip] DIV element id / reference or table cell id / reference.
-   * @return {Array} Returns array with members tableIndex, rowIndex and cellIndex. If position is not found then all array members will have value -1.
-   * @example
-   * // set REDIPS.drag reference
-   * var rd = REDIPS.drag;
-   * // display target and source position of dropped element
-   * rd.event.dropped = function () {
-   *    // get target and source position (method returns positions as array)
-   *    // pos[0] - target table index
-   *    // pos[1] - target row index
-   *    // pos[2] - target cell (column) index
-   *    // pos[3] - source table index
-   *    // pos[4] - source row index
-   *    // pos[5] - source cell (column) index
-   *    var pos = rd.getPosition();
-   *    // display element positions
-   *    console.log(pos);
-   * };
-   * @public
-   * @function
-   * @name REDIPS.drag#getPosition
-   */
-  getPosition = function (ip)
+  //Function returns a string in which all of the preceding and trailing white space has been removed, and in which all internal sequences of white is replaced with one white space.
+  normalize = function (str) 
   {
-      var ci, ri, // cellIndex, rowIndex and table index (needed for case if input parameter exists)
-      el,     // element reference
-      arr = []; // array to return
-    // set initial values for cell, row and table index
-    ci = ri = -1;
-    // if input parameter is is undefined, then return current location and source location (array will contain 6 elements)
-    if (ip === undefined)
+    if (str !== undefined) 
     {
-        // prepare array to return (row, cell and row_source, cell_source are global variables)
-        arr = [row, cell, row_source, cell_source];
-    }
-    // input parameter is defined (id or reference of table cell or any child of table cell)
-    else {
-      // if input parameter is string (this should be element id), then set element reference
-      if (typeof(ip) === 'string') {
-        el = document.getElementById(ip);
-      }
-      // else, input parameter is reference
-      else {
-        el = ip;
-      }
-      // if element exists
-      if (el) {
-        // find parent TD element (because "ip" could be the child element of table cell - DIV drag or any other inner element)
-        if (el.nodeName !== 'TD') {
-          el = findParent('TD', el);
-        }
-        // if node is table cell then set coordinates
-        if (el && el.nodeName === 'TD') {
-          // define cellIndex and rowIndex
-          ci = el.cellIndex;
-          ri = el.parentNode.rowIndex;
-        }
-      }
-      // prepare array with tableIndex, rowIndex and cellIndex (3 elements)
-      arr = [ri, ci];
-    }
-    // return result array
-    return arr;
-  };
-
-
-  /**
-   * Function returns a string in which all of the preceding and trailing white space has been
-   * removed, and in which all internal sequences of white is replaced with one white space.
-   * @param {String} str Input string.
-   * @return {String} Returns normalized string.
-   * @private
-   * @memberOf REDIPS.drag#
-   */
-  normalize = function (str) {
-    if (str !== undefined) {
       str = str.replace(/^\s+|\s+$/g, '').replace(/\s{2,}/g, ' ');
     }
-    // return normalized string (without preceding and trailing spaces)
-    return str;
+    
+    return str;                                                       // return normalized string (without preceding and trailing spaces)
   };
-
 
   /**
    * Method sets opacity to table row or deletes row content.
@@ -2215,7 +1659,8 @@ REDIPS.drag = (function ()
    * @function
    * @name REDIPS.drag#rowOpacity
    */
-  rowOpacity = function (el, opacity, color) {
+  rowOpacity = function (el, opacity, color) 
+  {
     var tdNodeList, // table cells
       i, j;   // loop variables
     // if input parameter is string (this should be element id), then set element reference
@@ -2253,47 +1698,13 @@ REDIPS.drag = (function ()
     }
     // when row is moved then REDIPS.drag will create mini table with one row
     // all browsers (IE8, Opera11, FF3.6, Chrome10) can set opacity to the table
-    else {
+    else 
+    {
       el.style.opacity = opacity / 100;         // set opacity for FF, Chrome, Opera
       el.style.filter = 'alpha(opacity=' + opacity + ')'; // set opacity for IE
       el.style.backgroundColor = color ? color : '';    // set background color
     }
   };
-
-
-  /**
-   * Method marks selected row as empty. Could be needed for displaying initially empty table.
-   * Input parameters are table id and row index.
-   * @param {String} tbl_id Table id.
-   * @param {Integer} row_idx Row index (starts from 0).
-   * @param {String} [color] Color of empty row (default is "White" or defined with REDIPS.drag.rowEmptyColor parameter).
-   * @see <a href="#style">style.rowEmptyColor</a>
-   * @example
-   * // set reference to the REDIPS.drag library
-   * rd = REDIPS.drag;
-   * // mark first row as empty in table with id="tbl1"
-   * rd.rowEmpty('tbl1', 0);
-   * @public
-   * @function
-   * @name REDIPS.drag#rowEmpty
-   */
-  rowEmpty = function (tbl_id, row_idx, color) {
-    var tbl = document.getElementById(tbl_id),
-      row = tbl.rows[row_idx];
-    // define color parameter if input parameter "color" is not defined
-    if (color === undefined) {
-      color = REDIPS.drag.style.rowEmptyColor;
-    }
-    // create a "property object" in which all custom properties of row will be saved.
-    if (row.redips === undefined) {
-      row.redips = {};
-    }
-    // set emptyRow property to true
-    row.redips.emptyRow = true;
-    // mark row as empty
-    rowOpacity(row, 'empty', color);
-  };
-
 
   return {
     /* public properties */
@@ -2399,7 +1810,6 @@ REDIPS.drag = (function ()
      * <li>{Boolean} clone.drop - If set to true, cloned element will be always placed to the table (to the last possible cell) no matter if is dropped outside the table. Default is false.</li>
      * </ul>
      * @type Object
-     * @name REDIPS.drag#clone
      */
     clone : clone,
     /* public methods (documented in main code) */
@@ -2408,61 +1818,54 @@ REDIPS.drag = (function ()
     enableDrag : enableDrag,
     enableDivs : enableDivs,
     relocate : relocate,
-    emptyCell : emptyCell,
-    deleteObject : deleteObject,
-    getPosition : getPosition,
     rowOpacity : rowOpacity,
-    rowEmpty : rowEmpty,
     getScrollPosition : getScrollPosition,
     getStyle : getStyle,
     findParent : findParent,
-    findCell : findCell,
     event : event
-  }; // end of public (return statement)
+  };
 }());
 
 
-// if REDIPS.event isn't already defined (from other REDIPS file)
-if (!REDIPS.event) {
-  REDIPS.event = (function () {
-    var add,  // add event listener
-      remove; // remove event listener
+if (!REDIPS.event)                                              // if REDIPS.event isn't already defined (from other REDIPS file)
+{
+  REDIPS.event = (function () 
+  {
+    var add;
+    var remove;
 
-    // http://msdn.microsoft.com/en-us/scriptjunkie/ff728624
-    // http://www.javascriptrules.com/2009/07/22/cross-browser-event-listener-with-design-patterns/
-    // http://www.quirksmode.org/js/events_order.html
-
-    // add event listener
-    add = function (obj, eventName, handler) {
-      if (obj.addEventListener) {
-        // (false) register event in bubble phase (event propagates from from target element up to the DOM root)
-        obj.addEventListener(eventName, handler, false);
+    add = function (obj, eventName, handler)                    // add event listener
+    {
+      if (obj.addEventListener) 
+      {
+        obj.addEventListener(eventName, handler, false);        // (false) register event in bubble phase (event propagates from from target element up to the DOM root)
       }
-      else if (obj.attachEvent) {
+      else if (obj.attachEvent) 
+      {
         obj.attachEvent('on' + eventName, handler);
       }
-      else {
+      else 
+      {
         obj['on' + eventName] = handler;
       }
     };
 
-    // remove event listener
-    remove = function (obj, eventName, handler) {
-      if (obj.removeEventListener) {
+    remove = function (obj, eventName, handler)                 // remove event listener
+    {
+      if (obj.removeEventListener) 
+      {
         obj.removeEventListener(eventName, handler, false);
       }
-      else if (obj.detachEvent) {
+      else if (obj.detachEvent) 
+      {
         obj.detachEvent('on' + eventName, handler);
       }
-      else {
+      else 
+      {
         obj['on' + eventName] = null;
       }
     };
 
-    return {
-      add   : add,
-      remove  : remove
-    }; // end of public (return statement)
-
+    return { add: add, remove: remove };
   }());
 }
