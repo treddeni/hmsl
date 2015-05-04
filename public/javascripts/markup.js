@@ -1,3 +1,23 @@
+function generateHeaderMarkup(projects)
+{
+  var markup = '<select id="projectSelector" class="form-control" onchange="selectProject()">';
+
+  markup += '<option id="selectProjectOption" value="0">Select Project...</option>';
+
+  for(var i = 0; i < projects.length; i++)
+  {
+    markup += '<option value="' + projects[i].id + '">' + projects[i].name + '</option>';
+  }
+
+  markup += '<option id="newProjectOption" value="-1">Create New Project...</option></select>';
+  markup += '<input id="editNewProjectNameInput" class="form-control"></input>';
+  
+  markup += '<a href="#" class="btn btn-default" style="float:right" onclick="saveToDatabase()">Save to Database</a>';
+  markup += '<a href="#" class="btn btn-default" style="float:right" onclick="saveLocally()">Save as File</a>';
+  
+  return markup;
+}
+
 function generateMarkup(tree)
 {
   var markup = '<table id="treeTable"><tr><th></th>';
@@ -7,7 +27,7 @@ function generateMarkup(tree)
     markup += '<th id="colHeader' + fields[i] + '" class="header"><div class="moveColGrip"></div><input id="colHeaderInput' + fields[i] + '" class="fieldNameInput" type="text" value="' + fields[i] + '"/><div id="grip' + i + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div></th>';
   }
 
-  markup += '</tr>'
+  markup += '</tr>';
 
   for(var j = 0; j < 1; j++)
   {
@@ -21,7 +41,7 @@ function generateMarkup(tree)
   return markup;
 }
 
-function addRow(node, depth, ancestors, parent)     //add node and data input for each field
+function addRow(node, depth, ancestors, parent)       //add node and data input for each field
 {
   var markup = '';
   var id;

@@ -2,8 +2,8 @@
 
 var redips = {};
 
-redips.init = function () {
-
+redips.init = function () 
+{
   var rd = REDIPS.drag;   // reference to the REDIPS.drag library
 
   rd.init();

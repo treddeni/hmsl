@@ -1,10 +1,13 @@
 /// <reference path="../../typings/jquery/jquery.d.ts"/>
 var markup;
 var uid = 1;
+var projects = { nextProjectID: 4, projects: [ {id:1, name:'Project One'}, {id:2, name:'Project Two'}, {id:3, name:'Project Three'} ]};
 var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
 var tree;
 
-/*var tree = { "project-id": 1001, "project-name": "Test", "nextNodeID": 5, "nodes": [{
+var ENTER_KEY = 13;
+
+/*var tree = { "projectID": 1, "projectName": "Test", "version": 1, "nextNodeID": 5, "nodes": [{
   "id": 1,
   "name": "node1",
   "values":
@@ -46,15 +49,56 @@ var resizeField = '0';
 
 $(document).ready(function()
 {
-  tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree'));     //get the tree model from the server
+  //TODO: read projects data from the database
+  //TODO: read fields from the database (put them in the tree?)
 
-  $("#redips-drag").html(generateMarkup(tree, fields));                   //append the markup to the DOM
-
-  redips.init();                                                          //initialize tree drag/drop library
-
-
-  refreshDataModelDisplay();
+  $('#header').html(generateHeaderMarkup(projects.projects));
 });
+
+function selectProject()
+{
+  var projectSelector = document.getElementById('projectSelector');
+  var selectedOption = projectSelector.options[projectSelector.selectedIndex];
+  
+  if(selectedOption.id == "newProjectOption")
+  {
+    $('#editNewProjectNameInput').val("Type New Project Name and Press Enter to Create");
+    $('#editNewProjectNameInput').show().focus().select();
+    
+    $('#editNewProjectNameInput').keyup(function(e)
+    {
+      if(e.keyCode == ENTER_KEY)
+      {
+        console.log('create new project: ' + $('#editNewProjectNameInput').val());
+        $('#editNewProjectNameInput').hide();
+        
+        //add an option for the new project to the projects list, select that option
+        var newProjectID = projects.nextProjectID.toString();                                                   //TODO: need to get this from the database to insure we get the correct id
+        var option = document.createElement("option");
+        option.text = $('#editNewProjectNameInput').val();
+        option.value = newProjectID;                                                 
+        $(option).insertBefore('#projectSelector option:nth-child(' + projectSelector.length + ')');
+        projectSelector.value = newProjectID;
+        
+        //TODO: add to the projects document in the database
+        //TODO: create a top node and tree for the project, make it the tree model, add it to the database
+      }
+    });
+  }
+  else
+  {
+    if(projectSelector.value > 0 && document.getElementById('selectProjectOption'))
+    {
+      projectSelector.remove(0);                                                                                //remove the select project option, once the user selects a project
+    }
+    
+    tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree?projectID=' + projectSelector.value));      //get the tree model from the server
+    $("#redips-drag").html(generateMarkup(tree, fields));                                                       //append the markup to the DOM
+    redips.init();                                                                                              //initialize tree drag/drop library
+  }   
+  
+  refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes                                                                                                       
+}
 
 var saveToDatabase = function()
 {
@@ -511,13 +555,10 @@ function updateNodeValue(id, node, field, value)
   return null;
 }
 
-function httpGet(theUrl)
+function httpGet(url, params)
 {
-    var xmlHttp = null;
-
-    xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false );
-    xmlHttp.send( null );
-
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", url, false);
+    xmlHttp.send(null);
     return xmlHttp.responseText;
 }
