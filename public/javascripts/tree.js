@@ -1,7 +1,8 @@
 /// <reference path="../../typings/jquery/jquery.d.ts"/>
 var markup;
 var uid = 1;
-var projects = { nextProjectID: 4, projects: [ {id:1, name:'Project One'}, {id:2, name:'Project Two'}, {id:3, name:'Project Three'} ]};
+//var projects = { nextProjectID: 4, projects: [ {id:1, name:'Project One'}, {id:2, name:'Project Two'}, {id:3, name:'Project Three'} ]};
+var projects;
 var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
 var tree;
 
@@ -49,13 +50,43 @@ var resizeField = '0';
 
 $(document).ready(function()
 {
-  //TODO: read projects data from the database
+  projects = JSON.parse(httpGet('http://localhost:3000/api/posts/projects'));                 //read projects from the database
+  
   //TODO: read fields from the database (put them in the tree?)
 
   $('#header').html(generateHeaderMarkup(projects.projects));
+  
+  $('#editNewProjectNameInput').keyup(function(e)
+  {
+    if(e.keyCode == ENTER_KEY)
+    {
+      $('#selectProjectOption').remove();                                                                     //remove the select project option, once the user selects a project 
+      
+      var newProjectName = $('#editNewProjectNameInput').val();
+      $('#editNewProjectNameInput').hide();
+      
+      //add an option for the new project to the projects list, select that option
+      var newProjectID = projects.nextProjectID.toString();                                                   //TODO: need to get this from the database to insure we get the correct id
+      var option = document.createElement("option");
+      option.text = newProjectName;
+      option.value = newProjectID;                                        
+      $(option).insertBefore('#projectSelector option:nth-child(' + $('#projectSelector').length + ')');
+      $('#projectSelector').val(newProjectID);
+      
+      $.ajax({ type: 'POST', url: '/api/posts/addProject?projectName=' + newProjectName });                   // add the new project to the projects document in the database
+      
+      //create a top node and tree for the project
+      tree = { "projectID": newProjectID, "projectName": newProjectName, "version": 1, "nextNodeID": 2, "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
+      $("#redips-drag").html(generateMarkup(tree, fields));                                                   //append the markup to the DOM
+      redips.init();                                                                                          //initialize tree drag/drop library
+      
+      saveToDatabase();
+      refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes 
+    }
+  });  
 });
 
-function selectProject()
+var selectProject = function()
 {
   var projectSelector = document.getElementById('projectSelector');
   var selectedOption = projectSelector.options[projectSelector.selectedIndex];
@@ -64,32 +95,12 @@ function selectProject()
   {
     $('#editNewProjectNameInput').val("Type New Project Name and Press Enter to Create");
     $('#editNewProjectNameInput').show().focus().select();
-    
-    $('#editNewProjectNameInput').keyup(function(e)
-    {
-      if(e.keyCode == ENTER_KEY)
-      {
-        console.log('create new project: ' + $('#editNewProjectNameInput').val());
-        $('#editNewProjectNameInput').hide();
-        
-        //add an option for the new project to the projects list, select that option
-        var newProjectID = projects.nextProjectID.toString();                                                   //TODO: need to get this from the database to insure we get the correct id
-        var option = document.createElement("option");
-        option.text = $('#editNewProjectNameInput').val();
-        option.value = newProjectID;                                                 
-        $(option).insertBefore('#projectSelector option:nth-child(' + projectSelector.length + ')');
-        projectSelector.value = newProjectID;
-        
-        //TODO: add to the projects document in the database
-        //TODO: create a top node and tree for the project, make it the tree model, add it to the database
-      }
-    });
   }
   else
   {
-    if(projectSelector.value > 0 && document.getElementById('selectProjectOption'))
+    if(projectSelector.value > 0 && document.getElementById('selectProjectOption'))                             //remove the select project option, once the user selects a project
     {
-      projectSelector.remove(0);                                                                                //remove the select project option, once the user selects a project
+      $('#selectProjectOption').remove(); 
     }
     
     tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree?projectID=' + projectSelector.value));      //get the tree model from the server
@@ -97,8 +108,8 @@ function selectProject()
     redips.init();                                                                                              //initialize tree drag/drop library
   }   
   
-  refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes                                                                                                       
-}
+  refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes                                                                                                   
+};
 
 var saveToDatabase = function()
 {
@@ -211,16 +222,30 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   var newParentNode = findNodeInTree(newParentID);
   var movedNode     = findNodeInTree(movedID);
 
-  if(oldParentNode.nodes && oldParentNode.nodes.length > 0)                                   //remove the moved node from it's old parent in the model
+  if(oldParentNode)
   {
-    for (var i = 0; i < oldParentNode.nodes.length; i++)
+    if(oldParentNode.nodes && oldParentNode.nodes.length > 0)                                 //remove the moved node from it's old parent in the model
     {
-      if (oldParentNode.nodes[i].id === movedID)
+      for (var i = 0; i < oldParentNode.nodes.length; i++)
       {
-        oldParentNode.nodes.splice(i, 1);
-        break;
+        if (oldParentNode.nodes[i].id === movedID)
+        {
+          oldParentNode.nodes.splice(i, 1);
+          break;
+        }
       }
     }
+  }
+  else
+  {
+    for (var i = 0; i < tree.nodes.length; i++)
+    {
+      if (tree.nodes[i].id === movedID)
+      {
+        tree.nodes.splice(i, 1);
+        break;
+      }
+    }    
   }
   
   //TODO: if the old parent is childless now, then hide the old parent's expand/collapse icon
@@ -383,6 +408,8 @@ var removeNodeRow = function(node)
 
 var copyNode = function(source)
 {
+  var nodeIndex;
+  var newRowMarkup;
   var sourceRow = getAncestorTag(source, 'tr');
   var nodeID = parseInt(sourceRow.id.replace('rowid', ''));
   
@@ -392,10 +419,19 @@ var copyNode = function(source)
   var newNode = jQuery.extend(true, {}, sourceNode);                                //clone the source node
   assignNewNodeIDs(newNode);                                                        //assign unique ids to each node in the clone
   
-  var nodeIndex = getNodeIndex(sourceParentNode.nodes, sourceNode.id);              //TODO: handle case where the user tries to copy a top level node
-  sourceParentNode.nodes.splice(nodeIndex, 0, newNode);
+  if(sourceParentNode === undefined)                                                //handle case where the user tries to copy a top level node
+  {
+    nodeIndex = getNodeIndex(tree.nodes, sourceNode.id);                            
+    tree.nodes.splice(nodeIndex, 0, newNode);
+    newRowMarkup = addRow(newNode, 0, '', 0);    
+  }
+  else
+  {
+    nodeIndex = getNodeIndex(sourceParentNode.nodes, sourceNode.id);
+    sourceParentNode.nodes.splice(nodeIndex, 0, newNode);
+    newRowMarkup = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
+  }
   
-  var newRowMarkup = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
   $(newRowMarkup).insertBefore(sourceRow);
   var newRow = document.getElementById('rowid' + newNode.id);
   REDIPS.drag.enableDivs('init', newRow.getElementsByTagName('div'));
