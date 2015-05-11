@@ -498,7 +498,7 @@ var updateNodeName = function(el)
   var node = findNodeInTree(nodeID);
   
   node.name = el.value;
-  console.log(el.value);
+  $('#nodeInput' + nodeID).attr('value', node.name);              //update the input value in the DOM, so that when we drag/move the row, the value is correct
   refreshDataModelDisplay();                                      //TODO: temp for displaying the model on the page for debugging purposes
 };
 
