@@ -1,6 +1,5 @@
-var mongo = require('mongodb');
-var db;
+var serverName = 'mongodb://localhost';
+var collection = 'tree';
+var url = serverName + '/' + collection;
 
-mongo.connect('mongodb://localhost/tree', function(err, database) { db = database; console.log('mongodb connected'); });
-
-module.exports = db;
+exports.url = url;

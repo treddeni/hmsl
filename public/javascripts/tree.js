@@ -2,7 +2,7 @@
 var markup;
 var uid = 1;
 //var projects = { nextProjectID: 4, projects: [ {id:1, name:'Project One'}, {id:2, name:'Project Two'}, {id:3, name:'Project Three'} ]};
-var projects;
+var projects = null;
 var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
 var tree;
 
@@ -50,39 +50,42 @@ var resizeField = '0';
 
 $(document).ready(function()
 {
-  projects = JSON.parse(httpGet('http://localhost:3000/api/posts/projects'));                 //read projects from the database
+  $.ajax({ type: 'GET', url: 'api/projects'}).done(function(data)                                         //read projects from the server
+  { 
+    projects = data; 
+    
+    //TODO: read fields from the database (put them in the tree?)
   
-  //TODO: read fields from the database (put them in the tree?)
-
-  $('#header').html(generateHeaderMarkup(projects.projects));
-  
-  $('#editNewProjectNameInput').keyup(function(e)
-  {
-    if(e.keyCode == ENTER_KEY)
+    $('#header').html(generateHeaderMarkup(projects.projects));
+    
+    $('#editNewProjectNameInput').keyup(function(e)
     {
-      $('#selectProjectOption').remove();                                                                     //remove the select project option, once the user selects a project 
-      
-      var newProjectName = $('#editNewProjectNameInput').val();
-      $('#editNewProjectNameInput').hide();
-      
-      //add an option for the new project to the projects list, select that option
-      var newProjectID = projects.nextProjectID.toString();                                                   //TODO: need to get this from the database to insure we get the correct id
-      var option = document.createElement("option");
-      option.text = newProjectName;
-      option.value = newProjectID;                                        
-      $(option).insertBefore('#projectSelector option:nth-child(' + $('#projectSelector').length + ')');
-      $('#projectSelector').val(newProjectID);
-      
-      $.ajax({ type: 'POST', url: '/api/posts/addProject?projectName=' + newProjectName });                   // add the new project to the projects document in the database
-      
-      //create a top node and tree for the project
-      tree = { "projectID": newProjectID, "projectName": newProjectName, "version": 1, "nextNodeID": 2, "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
-      $("#redips-drag").html(generateMarkup(tree, fields));                                                   //append the markup to the DOM
-      redips.init();                                                                                          //initialize tree drag/drop library
-      
-      saveToDatabase();
-      refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes 
-    }
+      if(e.keyCode == ENTER_KEY)
+      {
+        $('#selectProjectOption').remove();                                                                     //remove the select project option, once the user selects a project 
+        
+        var newProjectName = $('#editNewProjectNameInput').val();
+        $('#editNewProjectNameInput').hide();
+        
+        //add an option for the new project to the projects list, select that option
+        var newProjectID = projects.nextProjectID.toString();                                                   //TODO: need to get this from the database to insure we get the correct id
+        var option = document.createElement("option");
+        option.text = newProjectName;
+        option.value = newProjectID;                                        
+        $(option).insertBefore('#projectSelector option:nth-child(' + $('#projectSelector').length + ')');
+        $('#projectSelector').val(newProjectID);
+        
+        $.ajax({ type: 'POST', url: '/api/addProject?projectName=' + newProjectName });                   // add the new project to the projects document in the database
+        
+        //create a top node and tree for the project
+        tree = { "projectID": newProjectID, "projectName": newProjectName, "version": 1, "nextNodeID": 2, "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
+        $("#redips-drag").html(generateMarkup(tree, fields));                                                   //append the markup to the DOM
+        redips.init();                                                                                          //initialize tree drag/drop library
+        
+        saveToDatabase();
+        refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes 
+      }
+    });
   });  
 });
 
@@ -102,18 +105,20 @@ var selectProject = function()
     {
       $('#selectProjectOption').remove(); 
     }
-    
-    tree = JSON.parse(httpGet('http://localhost:3000/api/posts/tree?projectID=' + projectSelector.value));      //get the tree model from the server
-    $("#redips-drag").html(generateMarkup(tree, fields));                                                       //append the markup to the DOM
-    redips.init();                                                                                              //initialize tree drag/drop library
-  }   
-  
-  refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes                                                                                                   
+
+    $.ajax({ type: 'GET', url: 'api/tree?projectID=' + projectSelector.value }).done(function(data)         //read tree for the selected project from the database
+    {
+      tree = data;
+      $("#redips-drag").html(generateMarkup(tree, fields));                                                       //append the markup to the DOM
+      redips.init();                                                                                              //initialize tree drag/drop library
+      refreshDataModelDisplay();                                                                                  //TODO: temp for displaying the model on the page for debugging purposes
+    });  
+  }                                                                                                 
 };
 
 var saveToDatabase = function()
 {
-  $.ajax({ type: 'POST', url: '/api/posts/tree', dataType: 'json', data: {json:JSON.stringify(tree)} });
+  $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: {json:JSON.stringify(tree)} });
 };
 
 var refreshDataModelDisplay = function()
@@ -589,12 +594,4 @@ function updateNodeValue(id, node, field, value)
   }
 
   return null;
-}
-
-function httpGet(url, params)
-{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open("GET", url, false);
-    xmlHttp.send(null);
-    return xmlHttp.responseText;
 }
