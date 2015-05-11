@@ -48,47 +48,6 @@ var GRIPS_WIDTH = 16;
 var resizeColumnLeft = 0;
 var resizeField = '0';
 
-$(document).ready(function()
-{
-  $.ajax({ type: 'GET', url: 'api/projects'}).done(function(data)                                         //read projects from the server
-  { 
-    projects = data; 
-    
-    //TODO: read fields from the database (put them in the tree?)
-  
-    $('#header').html(generateHeaderMarkup(projects.projects));
-    
-    $('#editNewProjectNameInput').keyup(function(e)
-    {
-      if(e.keyCode == ENTER_KEY)
-      {
-        $('#selectProjectOption').remove();                                                                     //remove the select project option, once the user selects a project 
-        
-        var newProjectName = $('#editNewProjectNameInput').val();
-        $('#editNewProjectNameInput').hide();
-        
-        //add an option for the new project to the projects list, select that option
-        var newProjectID = projects.nextProjectID.toString();                                                   //TODO: need to get this from the database to insure we get the correct id
-        var option = document.createElement("option");
-        option.text = newProjectName;
-        option.value = newProjectID;                                        
-        $(option).insertBefore('#projectSelector option:nth-child(' + $('#projectSelector').length + ')');
-        $('#projectSelector').val(newProjectID);
-        
-        $.ajax({ type: 'POST', url: '/api/addProject?projectName=' + newProjectName });                   // add the new project to the projects document in the database
-        
-        //create a top node and tree for the project
-        tree = { "projectID": newProjectID, "projectName": newProjectName, "version": 1, "nextNodeID": 2, "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
-        $("#redips-drag").html(generateMarkup(tree, fields));                                                   //append the markup to the DOM
-        redips.init();                                                                                          //initialize tree drag/drop library
-        
-        saveToDatabase();
-        refreshDataModelDisplay();                                                                                    //TODO: temp for displaying the model on the page for debugging purposes 
-      }
-    });
-  });  
-});
-
 var selectProject = function()
 {
   var projectSelector = document.getElementById('projectSelector');
@@ -101,16 +60,17 @@ var selectProject = function()
   }
   else
   {
-    if(projectSelector.value > 0 && document.getElementById('selectProjectOption'))                             //remove the select project option, once the user selects a project
+    if(projectSelector.value > 0 && document.getElementById('selectProjectOption'))                               //remove the select project option, once the user selects a project
     {
       $('#selectProjectOption').remove(); 
     }
 
-    $.ajax({ type: 'GET', url: 'api/tree?projectID=' + projectSelector.value }).done(function(data)         //read tree for the selected project from the database
+    $.ajax({ type: 'GET', url: 'api/tree?projectID=' + projectSelector.value }).done(function(data)               //read tree for the selected project from the database
     {
       tree = data;
       $("#redips-drag").html(generateMarkup(tree, fields));                                                       //append the markup to the DOM
       redips.init();                                                                                              //initialize tree drag/drop library
+      initProjectActions();
       refreshDataModelDisplay();                                                                                  //TODO: temp for displaying the model on the page for debugging purposes
     });  
   }                                                                                                 

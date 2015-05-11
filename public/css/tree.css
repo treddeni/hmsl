@@ -46,6 +46,19 @@
   position: absolute
 }
 
+#projectActionInput
+{
+  display:  none;
+  top:      0px;
+  left:     0px;
+  position: absolute
+}
+
+#projectActionContainer
+{
+  position: relative;
+}
+
 #treeTable
 {
   border-collapse:  collapse;

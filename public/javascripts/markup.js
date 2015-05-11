@@ -13,14 +13,19 @@ function generateHeaderMarkup(projects)
   markup += '<input id="editNewProjectNameInput" class="form-control"></input>';
   
   markup += '<a href="#" class="btn btn-default" style="float:right" onclick="saveToDatabase()">Save to Database</a>';
-  markup += '<a href="#" class="btn btn-default" style="float:right" onclick="saveLocally()">Save as File</a>';
+  //markup += '<a href="#" class="btn btn-default" style="float:right" onclick="saveLocally()">Save as File</a>';
   
   return markup;
 }
 
 function generateMarkup(tree)
 {
-  var markup = '<table id="treeTable"><tr><th></th>';
+  var markup = '<table id="treeTable"><tr><th><div id="projectActionContainer">';
+  markup += '<select id="projectActionSelector" class="form-control" onchange="handleProjectAction()"><option></option>';
+  markup += '<option value="addField">Add Field</option>';
+  markup += '</select>';
+  markup += '<input id="projectActionInput" class="form-control"></input>';
+  markup += '</div></th>';
 
   for(var i = 0; i < fields.length; i++)              //add table headers with the field names
   {
