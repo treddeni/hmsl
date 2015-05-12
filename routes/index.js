@@ -27,19 +27,6 @@ router.get('/api/tree', function(req, res, next)
   });
 });
 
-router.get('/api/fields', function(req, res, next) 
-{
-  mongo.connect(database.url, function (err, db) 
-  {
-    db.collection('fields').find().toArray(function(err, documents) 
-    {
-      var fields = documents[0];
-      //TODO: handle case where fields is undefined/null
-      res.json(fields);
-    });
-  });
-});
-
 router.get('/api/projects', function(req, res, next) 
 {
   mongo.connect(database.url, function (err, db) 
@@ -67,17 +54,6 @@ router.post('/api/tree', function(req, res)
   mongo.connect(database.url, function (err, db) 
   {
     db.collection('tree').insert(tree, function(err, inserted) { if(err) throw err; console.log('success?: ' + inserted); });
-  });
-
-  res.sendStatus(201);
-});
-
-router.post('/api/fields', function(req, res)
-{
-  mongo.connect(database.url, function (err, db)
-  {
-    db.collection('fields').remove();
-    db.collection('fields').insert(req.body.json, function(err, inserted) { if(err) throw err; console.log('success?: ' + inserted); });
   });
 
   res.sendStatus(201);

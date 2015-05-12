@@ -3,6 +3,9 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var del = require('del');
+var mongo = require('mongodb');
+var database = require('./db');
+var exampleData = require('./test/data/example-data');
 
 var paths = { scripts: ['src/*'] };
 
@@ -26,4 +29,15 @@ gulp.task('scripts', ['clean'], function()
 gulp.task('watch', function() 
 {
   gulp.watch(paths.scripts, ['scripts']);
+});
+
+gulp.task('seed_db', function()
+{
+  mongo.connect(database.url, function (err, db) 
+  {
+    db.collection('tree').remove({});
+    db.collection('projects').remove({});
+    db.collection('tree').insert(exampleData.largeTree);
+    db.collection('projects').insert(exampleData.projects);
+  });
 });
