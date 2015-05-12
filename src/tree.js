@@ -1,4 +1,3 @@
-/// <reference path="../../typings/jquery/jquery.d.ts"/>
 var markup;
 var uid = 1;
 //var projects = { nextProjectID: 4, projects: [ {id:1, name:'Project One'}, {id:2, name:'Project Two'}, {id:3, name:'Project Three'} ]};
