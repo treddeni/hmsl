@@ -52,7 +52,7 @@ var selectProject = function()
 {
   var projectSelector = document.getElementById('projectSelector');
   var selectedOption = projectSelector.options[projectSelector.selectedIndex];
-  
+  console.log('select project');
   if(selectedOption.id == "newProjectOption")
   {
     $('#editNewProjectNameInput').val("Type New Project Name and Press Enter to Create");
