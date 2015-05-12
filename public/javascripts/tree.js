@@ -3,7 +3,7 @@ var markup;
 var uid = 1;
 //var projects = { nextProjectID: 4, projects: [ {id:1, name:'Project One'}, {id:2, name:'Project Two'}, {id:3, name:'Project Three'} ]};
 var projects = null;
-var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
+//var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
 var tree;
 
 var ENTER_KEY = 13;
@@ -68,9 +68,7 @@ var selectProject = function()
     $.ajax({ type: 'GET', url: 'api/tree?projectID=' + projectSelector.value }).done(function(data)               //read tree for the selected project from the database
     {
       tree = data;
-      $("#redips-drag").html(generateMarkup(tree, fields));                                                       //append the markup to the DOM
-      redips.init();                                                                                              //initialize tree drag/drop library
-      initProjectActions();
+      displayProject();
       refreshDataModelDisplay();                                                                                  //TODO: temp for displaying the model on the page for debugging purposes
     });  
   }                                                                                                 
@@ -510,6 +508,8 @@ function updateFieldValue(field, id)
   {
     aggregate_any(tree.nodes[i], field);
   }
+  
+  refreshDataModelDisplay();                                                                                  //TODO: temp for displaying the model on the page for debugging purposes  
 }
 
 function updateNodeValueInTree(id, field, value)
@@ -518,15 +518,18 @@ function updateNodeValueInTree(id, field, value)
 
   for(var i = 0; i < tree.nodes.length; i++)
   {
-    node = updateNodeValue(id, tree.nodes[i], field, value);
-
-    if(node)
+    node = tree.nodes[i];
+    
+    if(node.id == id)
     {
-      return node;
+      if(!node.values) { node.values = {}; }
+      node.values[field] = value;    
+    }
+    else
+    {    
+      updateNodeValue(id, node, field, value);
     }
   }
-
-  return node;
 }
 
 function updateNodeValue(id, node, field, value)
@@ -546,7 +549,7 @@ function updateNodeValue(id, node, field, value)
 
       if(found)
       {
-        if(!found.values) { found.values = []; }
+        if(!found.values) { found.values = {}; }
         found.values[field] = value;
         return found;
       }

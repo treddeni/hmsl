@@ -22,7 +22,7 @@ function aggregate_any(node, field)
 
     if(!node.values)
     {
-      node.values = [];
+      node.values = {};
     }
 
     node.values[field] = childrenSum;                                     //update the model
