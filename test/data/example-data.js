@@ -1,37 +1,44 @@
 var projects = { "_id": 1, "nextProjectID": 2, "projects": [ { "id": 1, "name": "Test Project" } ] };
 
-var smallTree = { "projectID": 1, "projectName": "Test", "version": 1, "nextNodeID": 5, "nodes": [{
-  "id": 1,
-  "name": "node1",
-  "values":
-  {
-    "Weight": 1.2,
-    "Cost": "0.50",
-    "Notes": "some bs"
-  },
-  "nodes": [
+var smallTree = {
+  "_id": "55525dd17a68e8501aa22260",
+  "projectID": "1",
+  "projectName": "Small Test Project",
+  "version": 1,
+  "nextNodeID": 5,
+  "fields": [],
+  "nodes": [{
+    "id": "1",
+    "name": "node1",
+    "values":
     {
-      "id": 2,
-      "name": "node1.1",
-      "values":
-      {
-        "Weight": 1.3,
-        "Notes": "some bs2"
-      },
-      "nodes": [
-        {
-          "id": 3,
-          "name": "node1.1.1",
-          "nodes": []
-        }
-      ]
+      "Weight": 1.2,
+      "Cost": "0.50",
+      "Notes": "some bs"
     },
-    {
-      "id": 4,
-      "name": "node1.2",
-      "nodes": []
-    }
-  ]
+    "nodes": [
+      {
+        "id": 2,
+        "name": "node1.1",
+        "values":
+        {
+          "Weight": 1.3,
+          "Notes": "some bs2"
+        },
+        "nodes": [
+          {
+            "id": 3,
+            "name": "node1.1.1",
+            "nodes": []
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "node1.2",
+        "nodes": []
+      }
+    ]
 }]};
 
 var largeTree = {
@@ -21383,5 +21390,6 @@ var largeTree = {
   ]
 };
 
+exports.smallTree = smallTree;
 exports.largeTree = largeTree;
 exports.projects = projects;

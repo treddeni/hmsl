@@ -30,7 +30,6 @@ function generateMarkup()
   for(var i = 0; i < tree.fields.length; i++)              //add table headers with the field names
   {
     markup += getFieldHeaderMarkup(tree.fields[i].name, i);
-    //markup += '<th id="colHeader' + tree.fields[i].name + '" class="header"><div class="moveColGrip"></div><input id="colHeaderInput' + tree.fields[i].name + '" class="fieldNameInput" type="text" value="' + tree.fields[i].name + '"/><div id="grip' + i + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div></th>';
   }
 
   markup += '</tr>';
@@ -53,7 +52,7 @@ function addRow(node, depth, ancestors, parent)       //add node and data input 
   var classes = 'nodeRow depth' + depth + ' expanded parent' + parent + ' ' + ancestors;
   var nodeID = node.id;
 
-  var dragHandle = '<div class="redips-drag"><span class="glyphicon glyphicon-move pull-right"></span></div>';
+  var dragHandle = '<div class="redips-drag pull-right"><i class="glyphicon glyphicon-move"></i></div>';
   var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs" style="margin:2px 0px 0px 0px" onclick="deleteNode(this)"><i class="glyphicon glyphicon-remove"></i></a>';
   var copyButton = '<a href="#" class="pull-right btn btn-info btn-xs" style="margin:2px 4px 0px 0px" onclick="copyNode(this)"><i class="glyphicon glyphicon-plus"></i></a>';
   var showExpandButton = '<a id="expandID' + nodeID + '" href="#" style="margin-left:' + (depth*10) + 'px" onclick="toggle(this)" class="btn btn-xs show-expand"><span id="icon' + nodeID + '" class="glyphicon glyphicon-chevron-down iconp' + parent + '"></span></a>';
