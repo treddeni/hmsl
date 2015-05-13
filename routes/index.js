@@ -1,9 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
-var mongo = require('mongodb');
 var defaults = require('../defaults');
-var database = require('../db');
+var db = require('../db');
 
 router.get('/', function(req, res, next)
 {
@@ -15,33 +14,29 @@ router.get('/api/tree', function(req, res, next)
 {
   var pid = req.query.projectID;
 
-  mongo.connect(database.url, function (err, db)
+  //find the tree with the newest version for the requested project
+  db.connection.collection('tree').find({projectID:pid}).sort({version:-1}).limit(1).toArray(function(err, documents)
   {
-    //find the tree with the newest version for the requested project
-    db.collection('tree').find({projectID:pid}).sort({version:-1}).limit(1).toArray(function(err, documents)
-    {
-      var tree = documents[0];
-      //TODO: handle case where tree is undefined/null
-      res.json(tree);
-    });
+    if(err) throw err;
+    var tree = documents[0];
+    //TODO: handle case where tree is undefined/null
+    res.json(tree);
   });
 });
 
 router.get('/api/projects', function(req, res, next) 
 {
-  mongo.connect(database.url, function (err, db) 
+  db.connection.collection('projects').find().toArray(function(err, documents) 
   {
-    db.collection('projects').find().toArray(function(err, documents) 
+    if(err) throw err;
+    var projects = documents[0];
+    
+    if(projects === undefined)
     {
-      var projects = documents[0];
-      
-      if(projects === undefined)
-      {
-        projects = defaults.PROJECTS;
-      }
-      
-      res.json(projects);
-    });
+      projects = defaults.PROJECTS;
+    }
+    
+    res.json(projects);
   });
 });
 
@@ -51,9 +46,9 @@ router.post('/api/tree', function(req, res)
   tree.version++;   //TODO: need to check the database and get the version that we should use
   delete tree._id;  //remove the _id from the tree so that MongoDB will assign a new unique id
 
-  mongo.connect(database.url, function (err, db) 
-  {
-    db.collection('tree').insert(tree, function(err, inserted) { if(err) throw err; console.log('success?: ' + inserted); });
+  db.connection.collection('tree').insert(tree, function(err, inserted) 
+  { 
+    if(err) throw err;    //TODO: handle error
   });
 
   res.sendStatus(201);
@@ -65,24 +60,23 @@ router.post('/api/addProject', function(req, res)
   //TODO: check for empty project name
   //TODO: check for non-unique project name
 
-  mongo.connect(database.url, function (err, db)
+  db.connection.collection('projects').find().toArray(function(err, documents) 
   {
-    db.collection('projects').find().toArray(function(err, documents) 
+    if(err) throw err;    //TODO: handle error
+    
+    //read the current project document to get the nextProjectID
+    var projectList = documents[0];
+    
+    if(projectList === undefined)
     {
-      //read the current project document to get the nextProjectID
-      var projectList = documents[0];
-      
-      if(projectList === undefined)
-      {
-        projectList = defaults.PROJECTS;
-        db.collection('projects').insert(defaults.PROJECTS);
-      }
-      
-      //TODO: fix concurrency problem, another user could add a project between when we read nextProjectID and add the new project
-      
-      //insert the new project with the next project id, increment the next project id 
-      db.collection('projects').update( { _id: 1 }, { $inc: { nextProjectID: 1 }, $push: { projects: {id: projectList.nextProjectID, name: newProjectName }} }, { upsert: true } );
-    });
+      projectList = defaults.PROJECTS;
+      db.connection.collection('projects').insert(defaults.PROJECTS);       //TODO: handle db error
+    }
+    
+    //TODO: fix concurrency problem, another user could add a project between when we read nextProjectID and add the new project
+    
+    //insert the new project with the next project id, increment the next project id 
+    db.connection.collection('projects').update( { _id: 1 }, { $inc: { nextProjectID: 1 }, $push: { projects: {id: projectList.nextProjectID, name: newProjectName }} }, { upsert: true } );      //TODO: handle db error
   });
 
   res.sendStatus(201);
