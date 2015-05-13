@@ -1,51 +1,9 @@
-var markup;
-var uid = 1;
-//var projects = { nextProjectID: 4, projects: [ {id:1, name:'Project One'}, {id:2, name:'Project Two'}, {id:3, name:'Project Three'} ]};
 var projects = null;
-//var fields = [ 'Weight', 'Cost', 'Notes', 'A', 'B', 'C', 'D', 'E', 'F', 'G' ];
 var tree;
 
 var ENTER_KEY = 13;
-
-/*var tree = { "projectID": 1, "projectName": "Test", "version": 1, "nextNodeID": 5, "nodes": [{
-  "id": 1,
-  "name": "node1",
-  "values":
-  {
-    "Weight": 1.2,
-    "Cost": "0.50",
-    "Notes": "some bs"
-  },
-  "nodes": [
-    {
-      "id": 2,
-      "name": "node1.1",
-      "values":
-      {
-        "Weight": 1.3,
-        "Notes": "some bs2"
-      },
-      "nodes": [
-        {
-          "id": 3,
-          "name": "node1.1.1",
-          "nodes": []
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "name": "node1.2",
-      "nodes": []
-    }
-  ]
-}]};*/
-
 var MIN_COLUMN_WIDTH = 70;
 var GRIPS_WIDTH = 16;
-
-var resizeColumnLeft = 0;
-var resizeField = '0';
 
 var selectProject = function()
 {

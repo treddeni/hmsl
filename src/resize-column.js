@@ -1,3 +1,6 @@
+var resizeColumnLeft = 0;
+var resizeField = '0';
+
 var startResize = function(e, grip)
 {
   $(document).bind('touchmove.resizeColGrip mousemove.resizeColGrip', resizeDrag).bind('touchend.resizeColGrip mouseup.resizeColGrip', resizeEnd);
