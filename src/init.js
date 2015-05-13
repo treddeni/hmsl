@@ -1,5 +1,7 @@
 $(document).ready(function()
 {
+  document.onkeydown = checkKey; 
+  
   $.ajax({ type: 'GET', url: 'api/projects'}).done(function(data)                                               //read projects from the server
   { 
     projects = data; 

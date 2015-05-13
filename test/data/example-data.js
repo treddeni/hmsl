@@ -6,7 +6,7 @@ var smallTree = {
   "projectName": "Small Test Project",
   "version": 1,
   "nextNodeID": 5,
-  "fields": [],
+  "fields": [{"name": "A"},{"name": "B"},{"name": "C"},{"name": "D"},{"name": "E"},{"name": "F"},{"name": "G"},{"name": "H"},{"name": "I"},{"name": "J"}],
   "nodes": [{
     "id": "1",
     "name": "node1",
@@ -47,7 +47,7 @@ var largeTree = {
   "projectName": "Test Project",
   "version": 2,
   "nextNodeID": 4247,
-  "fields": [],
+  "fields": [{"name": "A"},{"name": "B"},{"name": "C"},{"name": "D"},{"name": "E"},{"name": "F"},{"name": "G"},{"name": "H"},{"name": "I"},{"name": "J"}],
   "nodes": [
     {
       "id": 2,
