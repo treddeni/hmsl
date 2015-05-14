@@ -6,8 +6,17 @@
   border:   0px;
 }
 
+.fieldHeaderInput
+{
+  width:    70px;
+  margin:   0px;
+  padding:  0px;
+  border:   0px;
+}
+
 .fieldNameInput
 {
+  height:   34px;
   width:    70px;
   margin:   0px;
   padding:  0px;
@@ -74,6 +83,7 @@
 
 .header
 {
+  height:   34px;
   margin:   0px;
   padding:  0px 0px;
   border:   1px solid black;
@@ -83,9 +93,19 @@
 .cell
 {
   margin:   0px;
-  padding:  0px 4px;
+  /*padding:  0px 4px;*/
   border:   1px solid black;
-  width:    auto!important;
+  /*width:    auto!important;*/
+}
+
+.fieldHeaderCell
+{
+  margin:   0px;
+  /*padding:  0px 4px;*/
+  border-right:   1px solid black;
+  border-left:   1px solid black;
+  border-top:   1px solid black;
+  /*width:    auto!important;*/
 }
 
 .row
@@ -113,7 +133,7 @@
 .resizeColGrip
 {
   width:    8px;
-  height:   20px;
+  height:   34px;
   cursor:   col-resize;
   float:    left;
   margin:   0px;
@@ -128,7 +148,7 @@
 .moveColGrip
 {
   width:    8px;
-  height:   20px;
+  height:   34px;
   cursor:   move;
   float:    left;
   margin:   0px;

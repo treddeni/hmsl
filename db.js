@@ -16,3 +16,5 @@ MongoClient.connect(url, function(err, database)
   if(err) throw err;
   exports.connection = database;
 });
+
+exports.url = url;

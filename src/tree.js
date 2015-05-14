@@ -5,11 +5,17 @@ var ENTER_KEY = 13;
 var MIN_COLUMN_WIDTH = 70;
 var GRIPS_WIDTH = 16;
 
+function handleDataScroll()
+{
+  $('#redips-drag').scrollTop($('#data').scrollTop());
+  $('#fieldsRow').scrollLeft($('#data').scrollLeft());
+}
+
 var selectProject = function()
 {
   var projectSelector = document.getElementById('projectSelector');
   var selectedOption = projectSelector.options[projectSelector.selectedIndex];
-  console.log('select project');
+
   if(selectedOption.id == "newProjectOption")
   {
     $('#editNewProjectNameInput').val("Type New Project Name and Press Enter to Create");
@@ -38,8 +44,8 @@ var saveToDatabase = function()
 
 var refreshDataModelDisplay = function()
 {
-  var dataModelTextArea = document.getElementById('data-model');
-  dataModelTextArea.value = JSON.stringify(tree, null, '\t');
+  //var dataModelTextArea = document.getElementById('data-model');
+  //dataModelTextArea.value = JSON.stringify(tree, null, '\t');
 };
 
 var getDepth = function(row)
