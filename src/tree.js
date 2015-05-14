@@ -180,6 +180,9 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
 
   //fix up the ancestors classes for the moved row
   var movedRow = document.getElementById('rowid' + movedID);
+  var movedDataRow = document.getElementById('datarowid' + movedID);
+  var parentDataRow = document.getElementById('datarowid' + newParentID);
+  
   var ancestors = getAncestors(newParentRow);
   ancestors.push('ancestor' + newParentID);
   setNewAncestors(movedRow, ancestors, newParentID);
@@ -192,6 +195,9 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   document.getElementById('expandID' + movedID).style.marginLeft = (10 * newDepth) + 'px';    //change the indent of the moved node
 
   //move the table rows in the view
+  $(movedDataRow).remove();
+  $(movedDataRow).insertAfter(parentDataRow);   
+  
   if(movedNode.nodes && movedNode.nodes.length > 0)
   {
     for(var i = movedNode.nodes.length-1; i >= 0; i--)                                        // iterate backwards to perserve the order of the child nodes
@@ -204,7 +210,11 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
 var moveNode = function(node, nodeID, parentID, newDepth, ancestors)
 {
   var nodeRow = document.getElementById('rowid' + nodeID);
+  var nodeDataRow = document.getElementById('datarowid' + nodeID);
+  
   var parentRow = document.getElementById('rowid' + parentID);
+  var parentDataRow = document.getElementById('datarowid' + parentID);
+  
   var oldDepth = getDepth(nodeRow);
 
   var newAncestors = ancestors.slice(0);
@@ -217,6 +227,9 @@ var moveNode = function(node, nodeID, parentID, newDepth, ancestors)
 
   $(nodeRow).remove();
   $(nodeRow).insertAfter(parentRow);
+  
+  $(nodeDataRow).remove();
+  $(nodeDataRow).insertAfter(parentDataRow);  
 
   if(node.nodes && node.nodes.length > 0)
   {

@@ -1,6 +1,7 @@
 function displayProject()
 {
-  $("#fieldsRow").html(generateFieldsRowMarkup());
+  $('#projectAction').html(generateProjectSelectorMarkup());
+  $('#fieldsRow').html(generateFieldsRowMarkup());
   $('#fieldsRow').css('right', scrollBarWidth + 'px');                                              //shorten the width of the fieldsRow by the width of the scroll bar
   $("#data").html(generateDataMarkup()); 
 	$("#redips-drag").html(generateTreeMarkup());                                                     //append the markup to the DOM

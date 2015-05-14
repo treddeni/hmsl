@@ -18,16 +18,20 @@ function generateHeaderMarkup(projects)
   return markup;
 }
 
-function generateFieldsRowMarkup()
+function generateProjectSelectorMarkup()
 {
-  /*var markup = '<table><thead><tr id="headerRow"><th><div id="projectActionContainer">';
+  var markup = '<table><tr id="headerRow"><tr><div style="width:499px;height:34px">';
   markup += '<select id="projectActionSelector" class="form-control" onchange="handleProjectAction()"><option value="blank"></option>';
   markup += '<option value="addField">Add Field</option>';
   markup += '</select>';
   markup += '<input id="projectActionInput" class="form-control"></input>';
-  markup += '</div></th>';*/
-  
-  var markup = '<table id="fieldHeaderTable"><tr>';
+  markup += '</div></tr><table>';
+  return markup;  
+}
+
+function generateFieldsRowMarkup()
+{  
+  var markup = '<table id="fieldHeaderTable"><tr id="fieldHeaderRow">';
 
   for(var i = 0; i < tree.fields.length; i++)              //add table headers with the field names
   {
@@ -75,21 +79,7 @@ function addRow(node, depth, ancestors, parent)       //add node and data input 
     markup += hideExpandButton;                                                 //hide the expansion button
   }
 
-  markup += '<input id="nodeInput' + node.id + '" class="node" type="text" value="' + node.name + '" oninput="updateNodeName(this)"/></div></td>';
-
-  /*for(var i = 0; i < tree.fields.length; i++)                                        //add the data inputs for each fields
-  {
-    if(node.values && node.values[tree.fields[i].name])
-    {
-      markup += getFieldCellMarkup(tree.fields[i].name, nodeID, node.values[tree.fields[i].name]);
-    }
-    else
-    {
-      markup += getFieldCellMarkup(tree.fields[i].name, nodeID);
-    }
-  }*/
-
-  markup += '</tr>';
+  markup += '<input id="nodeInput' + node.id + '" class="node" type="text" value="' + node.name + '" oninput="updateNodeName(this)"/></div></td></tr>';
 
   if(node.nodes && node.nodes.length > 0)                                       //add the children of this node below this node's row
   {
@@ -106,18 +96,6 @@ function generateDataMarkup()
 {
   var markup = '<table id="dataTable">';
 
-
- /* markup += '<thead><tr id="headerRow">';
-
-  for(var i = 0; i < tree.fields.length; i++)              //add table headers with the field names
-  {
-    markup += getFieldHeaderMarkup(tree.fields[i].name, i);
-  }
-
-  markup += '</tr></thead>';*/
-
-
-
   for(var i = 0; i < tree.nodes.length; i++)        //add row for each node
   {
     markup += addDataRow(tree.nodes[i]);
@@ -129,7 +107,7 @@ function generateDataMarkup()
 
 function addDataRow(node)
 {
-  var markup = '<tr>';
+  var markup = '<tr id="datarowid' + node.id + '" class="dataRow">';
   
   for(var i = 0; i < tree.fields.length; i++)                                        //add the data inputs for each fields
   {
@@ -158,17 +136,17 @@ function addDataRow(node)
 
 function addColumn(fieldName)
 {
-  $('#headerRow').append(getFieldHeaderMarkup(fieldName, tree.fields.length));    //add field header
+  $('#fieldHeaderRow').append(getFieldHeaderMarkup(fieldName, tree.fields.length));    //add field header
   
-  $('.nodeRow').each(function(i, item)                                            //add cell for each node
+  $('.dataRow').each(function(i, item)                                                 //add cell for each node
   {
-    $(item).append(getFieldCellMarkup(fieldName, item.id.replace('rowid', '')));
+    $(item).append(getFieldCellMarkup(fieldName, item.id.replace('datarowid', '')));
   });
 }
 
 function getFieldHeaderMarkup(fieldName, index)
 {
-  return '<td class="fieldHeaderCell"><div style="width:80px"><input id="colHeaderInput' + fieldName + '" class="fieldHeaderInput" type="text" value="' + fieldName + '" style="width:50px"/></div></td>';
+  return '<td class="fieldHeaderCell"><div style="width:80px;height:34px"><input id="colHeaderInput' + fieldName + '" class="fieldNameInput" type="text" value="' + fieldName + '" style="width:50px"/></div></td>';
   //return '<th id="colHeader' + fieldName + '" class="header"><div class="moveColGrip"></div><input id="colHeaderInput' + fieldName + '" class="fieldNameInput" type="text" value="' + fieldName + '"/><div id="grip' + index + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div></th>';
 }
 
@@ -182,7 +160,6 @@ function getFieldCellMarkup(fieldName, nodeID, value)
   }
   
   return '<td class="cell"><div style="width:80px;height:21px"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + valueString + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></div></td>';
-  //return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + valueString + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></td>';
 }
 
 function getAssemblyMarkup(nodeID, newNodeID, depth)

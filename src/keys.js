@@ -10,35 +10,41 @@ function checkKey(e)
   if (e.keyCode == KEY_UP_ARROW) 
   {
     e.preventDefault();
-      
-    var info = getActiveElementInfo();
+    var prevRow = $(getAncestorTag(document.activeElement, 'tr')).prev()[0];
     
-    if(info)
+    if(prevRow)
     {
-      info[0]--;
-      $('#' + info[1] + info[0]).focus();
-    }  
+      $('#' + getNextElementID(prevRow)).focus();
+    }      
   }
   else if (e.keyCode == KEY_DOWN_ARROW) 
   {
     e.preventDefault();
+    var nextRow = $(getAncestorTag(document.activeElement, 'tr')).next()[0];
     
-    var info = getActiveElementInfo();
-    
-    if(info)
+    if(nextRow)
     {
-      info[0]++;
-      $('#' + info[1] + info[0]).focus();
-    }         
+      $('#' + getNextElementID(nextRow)).focus();
+    }       
   }
+  else if (e.keyCode == KEY_RIGHT_ARROW) 
+  {
+    e.preventDefault();
+    $(getAncestorTag(document.activeElement, 'td')).next().find('input').focus();  
+  }
+  else if (e.keyCode == KEY_LEFT_ARROW) 
+  {
+    e.preventDefault();
+    $(getAncestorTag(document.activeElement, 'td')).prev().find('input').focus();  
+  }    
 }
 
-function getActiveElementInfo()
+function getNextElementID(newRow)
 {
   var id = document.activeElement.id;  
   if(id.indexOf('nodeInput') > -1)
   {
-    return [ id.replace('nodeInput', ''), 'nodeInput' ];
+    return 'nodeInput' + newRow.id.replace('rowid','');
   }
   else
   {
@@ -47,12 +53,12 @@ function getActiveElementInfo()
     for(var i = 0; i < classes.length; i++)
     {
       var c = classes[i];
-      console.log(c);
+
       if(c.indexOf('fieldInput') > -1 && c != 'fieldInput')
       {
         var fieldName = c.replace('fieldInput', '');
-        return  [ document.activeElement.id.replace(fieldName, ''), fieldName ];
+        return fieldName + newRow.id.replace('datarowid','');
       }
     }
   }   
-} 
+}

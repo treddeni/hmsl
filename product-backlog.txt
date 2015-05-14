@@ -1,6 +1,5 @@
 Incomplete User Stories
 -----------------------
-- Navigate rows using the arrow keys
 - Edit a field's name
 - Choose the data type of a field.  Choices should be number, choice, and string.
 - Choose how a field should aggregate, by selecting whether a field aggregates or not, and the field used for the quantity in the aggregation
@@ -61,4 +60,4 @@ Completed User Stories
 - Edit a node's value for a field
 - Automatically aggregate field values when the user changes a node's field value
 - Resize a column
-- Navigate columns using the arrow keys
+- Navigate rows and columns using the arrow keys
