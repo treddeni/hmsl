@@ -1,9 +1,9 @@
 function displayProject()
 {
-  $('#projectAction').html(generateProjectSelectorMarkup());
-  $('#fieldsRow').html(generateFieldsRowMarkup());
-  $('#fieldsRow').css('right', scrollBarWidth + 'px');                                              //shorten the width of the fieldsRow by the width of the scroll bar
-  $("#data").html(generateDataMarkup()); 
+  $('#project-action-container').html(generateProjectSelectorMarkup());
+  $('#fields-header-row').html(generateFieldsRowMarkup());
+  $('#fields-header-row').css('right', scrollBarWidth + 'px');                                              //shorten the width of the fieldsRow by the width of the scroll bar
+  $("#data-container").html(generateDataMarkup()); 
 	$("#redips-drag").html(generateTreeMarkup());                                                     //append the markup to the DOM
   $('#redips-drag').css('bottom', scrollBarWidth + 'px');                                           //shorten the height of the tree section by the width of the scroll bar
 	redips.init();                                                                                    //initialize tree drag/drop library

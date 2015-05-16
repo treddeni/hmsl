@@ -1,0 +1,258 @@
+@header-height:        80px;
+@tree-width:           499px;
+@fields-header-height: 34px;
+@default-cell-width:   80px;
+@cell-height:          21px;
+@project-select-width: 500px;
+
+#header
+{
+  height:   @header-height;
+  position: relative;
+  top:      0px;
+}
+
+#project-action-container
+{
+  left:     0px;
+  top:      @header-height;
+  right:    @tree-width;
+  position: absolute;
+}
+
+#fields-header-row
+{
+  left:     (@tree-width+1);
+  top:      @header-height;
+  overflow: hidden;
+  position: absolute;  
+}
+
+#redips-drag
+{
+  top:                    (@header-height+@fields-header-height);
+  bottom:                 0px;
+  left:                   0px;
+  width:                  (@tree-width+1);
+  overflow:               hidden;
+  position:               absolute;
+  -webkit-touch-callout:  none;
+  -webkit-user-select:    none;
+  -khtml-user-select:     none;
+  -moz-user-select:       none;
+  -ms-user-select:        none;
+  user-select:            none;
+}
+
+#data-container
+{
+  top:      (@header-height+@fields-header-height);
+  bottom:   0px;
+  left:     (@tree-width+1);
+  right:    0px;
+  overflow: scroll;
+  position: absolute;
+}
+
+#project-select-container
+{
+  width:  @tree-width;
+  height: @fields-header-height;
+}
+
+.redips-drag
+{
+  white-space:  nowrap;
+  display:      inline;
+  margin:       1px 4px 0px 0px;
+}
+
+.fieldHeaderContainer
+{
+  width:    @default-cell-width;
+  height:   @fields-header-height;
+  position: relative;  
+}
+
+.fieldHeaderButton
+{
+  width:    20%;
+  left:     70%;
+  position: absolute;  
+}
+
+.fieldInput
+{
+  width:    @default-cell-width;
+  height:   @cell-height;
+  margin:   0px;
+  padding:  0px;
+  border:   0px;
+}
+
+.fieldNameInputContainer
+{
+  width:    60%;
+  height:   100%;
+  left:     10%;
+  top:      0px;
+  position: absolute;  
+}
+
+.fieldNameInput
+{
+  width:    100%;
+  height:   100%;
+  margin:   0px;
+  padding:  0px;
+  border:   0px;
+  resize:   none;
+}
+
+.node-container
+{
+  width: @tree-width;
+}
+
+.node
+{
+  margin:   0px;
+  padding:  0px;
+  border:   0px;
+}
+
+#projectSelector
+{
+  width:    @project-select-width;
+  top:      0px;
+  left:     0px;
+  position: absolute  
+}
+
+#editNewProjectNameInput
+{
+  display:  none;
+  width:    @project-select-width;
+  top:      0px;
+  left:     0px;
+  position: absolute
+}
+
+#projectActionInput
+{
+  display:  none;
+  width:    90%;
+  top:      0px;
+  left:     0px;
+  position: absolute
+}
+
+#projectActionContainer
+{
+  position: relative;
+}
+
+#treeTable
+{
+  border-collapse:  collapse;
+  border:           1px solid black;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.cell
+{
+  margin:   0px;
+  border:   1px solid black;
+}
+
+.fieldHeaderCell
+{
+  margin:   0px;
+  border-right:   1px solid black;
+  border-left:   1px solid black;
+  border-top:   1px solid black;
+}
+
+.show-expand
+{
+  visibility: visible;
+}
+
+.hide-expand
+{
+  visibility: hidden;
+}
+
+.resizeColGrip
+{
+  position: absolute;
+  right:    0px;
+  width:    10%;
+  height:   @fields-header-height;
+  cursor:   col-resize;
+  margin:   0px;
+  padding:  0px;
+}
+
+.resizeColGrip:hover
+{
+  background-color: #99CCFF;
+}
+
+.moveColGrip
+{
+  left:     0px;
+  width:    10%;
+  height:   @fields-header-height;
+  cursor:   move;
+  position: absolute;
+  margin:   0px;
+  padding:  0px;
+}
+
+.moveColGrip:hover
+{
+  background-color: #99CCFF;
+}
+
+#resizeLine
+{
+  height:       4000px;
+  border-left:  1px dashed black;
+  visibility:   hidden;
+  position:     absolute;
+  top:          0px;
+  left:         600px;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.delete-button
+{
+  margin: 2px 2px 0px 0px;  
+}
+
+.copy-button
+{
+  margin: 2px 4px 0px 0px;
+}
+
+#save-database-button
+{
+  float: right;
+}
+
+#save-file-button
+{
+  float: right;
+}

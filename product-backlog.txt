@@ -1,5 +1,6 @@
 Incomplete User Stories
 -----------------------
+- Resize a column
 - Edit a field's name
 - Choose the data type of a field.  Choices should be number, choice, and string.
 - Choose how a field should aggregate, by selecting whether a field aggregates or not, and the field used for the quantity in the aggregation
@@ -38,7 +39,7 @@ Future User Stories
 - Log in
 - Log out
 - Share project with another user.  Sharing could be full access or read only.
-- View differences/changes between two different version of a project
+- View differences/changes between two different versions of a project
 - Set the part number for a node (and enforce part rules: field value and structure consistency)
 - Search for a part or node
 - Tracking of alternate configurations of a project
@@ -59,5 +60,4 @@ Completed User Stories
 - Add a field to the current project
 - Edit a node's value for a field
 - Automatically aggregate field values when the user changes a node's field value
-- Resize a column
 - Navigate rows and columns using the arrow keys

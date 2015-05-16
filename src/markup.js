@@ -1,32 +1,29 @@
 function generateHeaderMarkup(projects)
 {
-  var markup = '<select id="projectSelector" class="form-control" onchange="selectProject()">';
-
-  markup += '<option id="selectProjectOption" value="0">Select Project...</option>';
+  var markup = '<select id="projectSelector" class="form-control" onchange="selectProject()">'
+  + '<option id="selectProjectOption" value="0">Select Project...</option>';
 
   for(var i = 0; i < projects.length; i++)
   {
     markup += '<option value="' + projects[i].id + '">' + projects[i].name + '</option>';
   }
 
-  markup += '<option id="newProjectOption" value="-1">Create New Project...</option></select>';
-  markup += '<input id="editNewProjectNameInput" class="form-control"></input>';
-  
-  markup += '<a href="#" class="btn btn-default" style="float:right" onclick="saveToDatabase()">Save to Database</a>';
-  //markup += '<a href="#" class="btn btn-default" style="float:right" onclick="saveLocally()">Save as File</a>';
+  markup += '<option id="newProjectOption" value="-1">Create New Project...</option></select>'
+  + '<input id="editNewProjectNameInput" class="form-control"></input>'
+  + '<a href="#" id="save-database-button" class="btn btn-default" onclick="saveToDatabase()">Save to Database</a>';
+  //markup += '<a href="#" class="btn btn-default" id="save-file-button" onclick="saveLocally()">Save as File</a>';
   
   return markup;
 }
 
 function generateProjectSelectorMarkup()
 {
-  var markup = '<table><tr id="headerRow"><tr><div style="width:499px;height:34px">';
-  markup += '<select id="projectActionSelector" class="form-control" onchange="handleProjectAction()"><option value="blank"></option>';
-  markup += '<option value="addField">Add Field</option>';
-  markup += '</select>';
-  markup += '<input id="projectActionInput" class="form-control"></input>';
-  markup += '</div></tr><table>';
-  return markup;  
+  return '<table><tr id="headerRow"><tr><div id="project-select-container">'
+  + '<select id="projectActionSelector" class="form-control" onchange="handleProjectAction()"><option value="blank"></option>'
+  + '<option value="addField">Add Field</option>'
+  + '</select>'
+  + '<input id="projectActionInput" class="form-control"></input>'
+  + '</div></tr><table>'; 
 }
 
 function generateFieldsRowMarkup()
@@ -62,12 +59,12 @@ function addRow(node, depth, ancestors, parent)       //add node and data input 
   var nodeID = node.id;
 
   var dragHandle = '<div class="redips-drag pull-right"><i class="glyphicon glyphicon-move"></i></div>';
-  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs" style="margin:2px 2px 0px 0px" onclick="deleteNode(this)"><i class="glyphicon glyphicon-remove"></i></a>';
-  var copyButton = '<a href="#" class="pull-right btn btn-info btn-xs" style="margin:2px 4px 0px 0px" onclick="copyNode(this)"><i class="glyphicon glyphicon-plus"></i></a>';
+  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs delete-button" onclick="deleteNode(this)"><i class="glyphicon glyphicon-remove"></i></a>';
+  var copyButton = '<a href="#"  class="pull-right btn btn-info btn-xs copy-button" onclick="copyNode(this)"><i class="glyphicon glyphicon-plus"></i></a>';
   var showExpandButton = '<a id="expandID' + nodeID + '" href="#" style="margin-left:' + (depth*10) + 'px" onclick="toggle(this)" class="btn btn-xs show-expand"><span id="icon' + nodeID + '" class="glyphicon glyphicon-chevron-down iconp' + parent + '"></span></a>';
   var hideExpandButton = '<a id="expandID' + nodeID + '" href="#" style="margin-left:' + (depth*10) + 'px" onclick="toggle(this)" class="btn btn-xs hide-expand"><span id="icon' + nodeID + '" class="glyphicon glyphicon-chevron-down iconp' + parent + '"></span></a>';
 
-  markup += '<tr id="rowid' + nodeID + '" class="' + classes + '"><td class="redips-rowhandler cell"><div style="width:499px">';
+  markup += '<tr id="rowid' + nodeID + '" class="' + classes + '"><td class="redips-rowhandler cell"><div class="node-container">';
   markup += deleteButton + copyButton + dragHandle;
 
   if(node.nodes && node.nodes.length > 0)                                       //if node is a parent
@@ -79,7 +76,7 @@ function addRow(node, depth, ancestors, parent)       //add node and data input 
     markup += hideExpandButton;                                                 //hide the expansion button
   }
 
-  markup += '<input id="nodeInput' + node.id + '" class="node" type="text" value="' + node.name + '" oninput="updateNodeName(this)"/></div></td></tr>';
+  markup += '<input id="nodeInput' + node.id + '" class="node" type="text" value="' + node.name + '" style="width:' + (400-depth*10) + 'px" oninput="updateNodeName(this)"/></div></td></tr>';
 
   if(node.nodes && node.nodes.length > 0)                                       //add the children of this node below this node's row
   {
@@ -117,7 +114,7 @@ function addDataRow(node)
     }
     else
     {
-      markup += getFieldCellMarkup(tree.fields[i].name, node.id);
+      markup += getFieldCellMarkup(tree.fields[i].name, node.id, '');
     }
   }
   
@@ -146,20 +143,18 @@ function addColumn(fieldName)
 
 function getFieldHeaderMarkup(fieldName, index)
 {
-  return '<td class="fieldHeaderCell"><div style="width:80px;height:34px"><input id="colHeaderInput' + fieldName + '" class="fieldNameInput" type="text" value="' + fieldName + '" style="width:50px"/></div></td>';
+  return '<td class="fieldHeaderCell"><div class="fieldHeaderContainer">'
+  + '<div class="moveColGrip"></div>'
+  + '<div class="fieldNameInputContainer"><textarea id="colHeaderInput' + fieldName + '" class="fieldNameInput">' + fieldName + '</textarea></div>'
+  + '<div class="fieldHeaderButton"></div>'
+  + '<div id="grip' + index + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div>'
+  + '</div></td>';
   //return '<th id="colHeader' + fieldName + '" class="header"><div class="moveColGrip"></div><input id="colHeaderInput' + fieldName + '" class="fieldNameInput" type="text" value="' + fieldName + '"/><div id="grip' + index + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div></th>';
 }
 
 function getFieldCellMarkup(fieldName, nodeID, value)
-{
-  var valueString = '';
-  
-  if(value)
-  {
-    valueString = value;
-  }
-  
-  return '<td class="cell"><div style="width:80px;height:21px"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + valueString + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></div></td>';
+{  
+  return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + value + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></td>';
 }
 
 function getAssemblyMarkup(nodeID, newNodeID, depth)
