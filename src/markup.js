@@ -13,6 +13,12 @@ function generateHeaderMarkup(projects)
   + '<a href="#" id="save-database-button" class="btn btn-default" onclick="saveToDatabase()">Save to Database</a>';
   //markup += '<a href="#" class="btn btn-default" id="save-file-button" onclick="saveLocally()">Save as File</a>';
   
+  //markup += '<div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">';
+  //markup += '<span class="caret"></span></button>';
+  //markup += '<ul class="dropdown-menu" role="menu" aria-labelledby="menu1">';
+  //markup += '<li role="presentation"><a role="menuitem" tabindex="-1" href="#">HTML</a></li>';
+  //markup += '</ul></div>';  
+  
   return markup;
 }
 
@@ -146,7 +152,9 @@ function getFieldHeaderMarkup(fieldName, index)
   return '<td class="fieldHeaderCell"><div class="fieldHeaderContainer">'
   + '<div class="moveColGrip"></div>'
   + '<div class="fieldNameInputContainer"><textarea id="colHeaderInput' + fieldName + '" class="fieldNameInput">' + fieldName + '</textarea></div>'
-  + '<div class="fieldHeaderButton"></div>'
+  + '<div class="fieldHeaderButton">'
+  + '<img src="images/down-arrow.png" onclick="showMenu(event, \'' + fieldName + '\');" style="cursor:pointer"/>'
+  + '</div>'
   + '<div id="grip' + index + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div>'
   + '</div></td>';
   //return '<th id="colHeader' + fieldName + '" class="header"><div class="moveColGrip"></div><input id="colHeaderInput' + fieldName + '" class="fieldNameInput" type="text" value="' + fieldName + '"/><div id="grip' + index + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div></th>';
@@ -162,4 +170,56 @@ function getAssemblyMarkup(nodeID, newNodeID, depth)
   var node    = findNodeInTree(nodeID);
   var parent  = findParentInTree(nodeID);
   return addRow(node, depth, 'ancestor' + parent.id, parent.id);
+}
+
+function getFieldMenuMarkup(fieldName, x, y)
+{
+  var field = null;
+  
+  for(var i = 0; i < tree.fields.length; i++)
+  {
+    if(tree.fields[i].name === fieldName)
+    {
+      field = tree.fields[i];
+    }
+  }
+  
+  if(field == null)
+  {
+    //TODO: handle field not found error
+  }
+  
+  console.log(field.name);
+  
+  var markup = '<div id="fieldMenu" style="left:' + x + 'px;top:' + y + 'px;"><ul>'
+    + '<li>Number'
+      + '<ul>'
+        + '<li>Precision'
+          + '<ul>'
+            + '<li>Scientific</li>'
+            + '<li>0</li>'
+            + '<li>0.0</li>'
+            + '<li>0.00</li>'
+          + '</ul>'
+        + '</li>'
+        + '<li>Aggregation Type'
+          + '<ul>'
+            + '<li>Sum any defined children'
+              + '<ul>';
+              
+  for(var i = 0; i < tree.fields.length; i++)
+  {
+    markup += '<li>' + tree.fields[i].name + '</li>';
+  }
+              
+       markup += '</ul></li>'
+            + '<li>Do not aggregate</li>'
+          + '</ul>'
+        + '</li>'
+      + '</ul>'
+    + '</li>'
+    + '<li>String</li>'
+    + '<li>Choice</li>'
+  + '</ul></div>';
+  return markup;
 }
