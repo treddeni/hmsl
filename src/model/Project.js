@@ -16,3 +16,8 @@ Project.getField = function(name)
   
   return null;
 }
+
+Project.saveToDatabase = function()
+{
+  $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: { json:JSON.stringify(tree) } });
+};

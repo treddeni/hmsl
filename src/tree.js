@@ -37,11 +37,6 @@ var selectProject = function()
   }                                                                                                 
 };
 
-var saveToDatabase = function()
-{
-  $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: {json:JSON.stringify(tree)} });
-};
-
 var refreshDataModelDisplay = function()
 {
   //var dataModelTextArea = document.getElementById('data-model');

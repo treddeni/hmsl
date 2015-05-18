@@ -5,7 +5,9 @@ var MenuItem = function(display, value, varName, field)
   this.varName = varName;
   this.field = field;
   this.items = [];
-  
+  this.id = MenuItem.id++;
+  this.parent = -1;
+
   if(field)
   {
     this.checked = field[varName] === value;
@@ -16,7 +18,4 @@ var MenuItem = function(display, value, varName, field)
   }
 };
 
-MenuItem.handleClick = function(fieldName, varName, value)
-{
-  Project.getField(fieldName)[varName] = value;
-};
+MenuItem.id = 0;

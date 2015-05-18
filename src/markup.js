@@ -10,14 +10,8 @@ function generateHeaderMarkup(projects)
 
   markup += '<option id="newProjectOption" value="-1">Create New Project...</option></select>'
   + '<input id="editNewProjectNameInput" class="form-control"></input>'
-  + '<a href="#" id="save-database-button" class="btn btn-default" onclick="saveToDatabase()">Save to Database</a>';
+  + '<a href="#" id="save-database-button" class="btn btn-default" onclick="Project.saveToDatabase()">Save to Database</a>';
   //markup += '<a href="#" class="btn btn-default" id="save-file-button" onclick="saveLocally()">Save as File</a>';
-  
-  //markup += '<div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">';
-  //markup += '<span class="caret"></span></button>';
-  //markup += '<ul class="dropdown-menu" role="menu" aria-labelledby="menu1">';
-  //markup += '<li role="presentation"><a role="menuitem" tabindex="-1" href="#">HTML</a></li>';
-  //markup += '</ul></div>';  
   
   return markup;
 }
@@ -176,7 +170,7 @@ function getFieldMenuMarkup(fieldName, x, y)
 {
   var field = Project.getField(fieldName);
   
-  var menu = {};
+  var menu = new Menu();
 
   var numberItem = new MenuItem('Number', Field.NUMBER, 'datatype', field);
   var precisionItem = new MenuItem('Format');
@@ -225,25 +219,21 @@ function generateMenuMarkup(menu)
   {
     var item = menu.items[i];
     
-    markup += '<li>';
+    markup += '<li onclick="Menu.handleClick(' + item.id + ');">';
     
     if(item.field)
     {
       if(item.checked)
       {
-        markup += '<img src="' + CHECK_MARK_IMAGE_PATH + '" style="margin-right:10px;"/><span onclick="MenuItem.handleClick(\'' + item.field.name + '\', \'' + item.varName + '\', \'' + item.value + '\');">';
+        markup += '<img id="menuItem' + item.id + '" src="' + CHECK_MARK_IMAGE_PATH + '" class="checkedMenuItem"/>';
       }
       else
       {
-        markup += '<img src="' + CHECK_MARK_IMAGE_PATH + '" style="visibility:hidden;margin-right:10px;"/><span onclick="MenuItem.handleClick(\'' + item.field.name + '\', \'' + item.varName + '\', \'' + item.value + '\');">';
+        markup += '<img id="menuItem' + item.id + '" src="' + CHECK_MARK_IMAGE_PATH + '" class="uncheckedMenuItem"/>';
       }
     }
-    else
-    {
-      markup += '<span>';
-    }
     
-    markup += item.display + '</span>';
+    markup += item.display;
 
     if(item.items && item.items.length > 0)
     {
