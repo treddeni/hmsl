@@ -19,8 +19,6 @@ redips.init = function ()
 
     moveAssembly(movedID, newParentID, oldParentID, newParentRow);  //move the node in the data, including all descendant nodes
 
-    refreshDataModelDisplay();                                      //TODO: temp for displaying the model on the page for debugging purposes
-
     //show the expand button for the new parent, in case it was previously childless
     document.getElementById('expandID' + newParentID).classList.remove('hide-expand');
     document.getElementById('expandID' + newParentID).classList.add('show-expand');

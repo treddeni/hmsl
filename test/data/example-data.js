@@ -6,7 +6,17 @@ var smallTree = {
   "projectName": "Small Test Project",
   "version": 1,
   "nextNodeID": 5,
-  "fields": [{"name": "A"},{"name": "B"},{"name": "C"},{"name": "D"},{"name": "E"},{"name": "F"},{"name": "G"},{"name": "H"},{"name": "I"},{"name": "J"}],
+  "fields": [ {"name": "A","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "B","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "C","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "D","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "E","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "F","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "G","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "H","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "I","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "J","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null}
+  ],
   "nodes": [{
     "id": "1",
     "name": "node1",
@@ -47,7 +57,17 @@ var largeTree = {
   "projectName": "Test Project",
   "version": 2,
   "nextNodeID": 4247,
-  "fields": [{"name": "A"},{"name": "B"},{"name": "C"},{"name": "D"},{"name": "E"},{"name": "F"},{"name": "G"},{"name": "H"},{"name": "I"},{"name": "J"}],
+  "fields": [ {"name": "A","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "B","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "C","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "D","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "E","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "F","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "G","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "H","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "I","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null},
+              {"name": "J","datatype": "0","format": "0","precision": "0.00","agg_type": "0","agg_qty_field": null}
+  ],
   "nodes": [
     {
       "id": 2,

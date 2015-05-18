@@ -32,16 +32,14 @@ var selectProject = function()
     {
       tree = data;
       displayProject();
-      refreshDataModelDisplay();                                                                                  //TODO: temp for displaying the model on the page for debugging purposes
     });  
   }                                                                                                 
 };
 
-var refreshDataModelDisplay = function()
+function printProject()
 {
-  //var dataModelTextArea = document.getElementById('data-model');
-  //dataModelTextArea.value = JSON.stringify(tree, null, '\t');
-};
+  console.log(JSON.stringify(tree, null, '\t'));
+}
 
 var getDepth = function(row)
 {
@@ -322,8 +320,6 @@ var deleteNode = function(el)
       break;
     }
   }
-  
-  refreshDataModelDisplay();                                                        //TODO: temp for displaying the model on the page for debugging purposes
 };
 
 var removeNodeRow = function(node)
@@ -369,8 +365,6 @@ var copyNode = function(source)
   $(newRowMarkup).insertBefore(sourceRow);
   var newRow = document.getElementById('rowid' + newNode.id);
   REDIPS.drag.enableDivs('init', newRow.getElementsByTagName('div'));
-  
-  refreshDataModelDisplay();                                                        //TODO: temp for displaying the model on the page for debugging purposes
 };
 
 var assignNewNodeIDs = function(node)
@@ -468,7 +462,6 @@ var updateNodeName = function(el)
   
   node.name = el.value;
   $('#nodeInput' + nodeID).attr('value', node.name);              //update the input value in the DOM, so that when we drag/move the row, the value is correct
-  refreshDataModelDisplay();                                      //TODO: temp for displaying the model on the page for debugging purposes
 };
 
 function updateFieldValue(field, id)
@@ -478,9 +471,7 @@ function updateFieldValue(field, id)
   for(var i = 0; i < tree.nodes.length; i++)
   {
     aggregate_any(tree.nodes[i], field);
-  }
-  
-  refreshDataModelDisplay();                                                                                  //TODO: temp for displaying the model on the page for debugging purposes  
+  } 
 }
 
 function updateNodeValueInTree(id, field, value)

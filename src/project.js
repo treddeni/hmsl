@@ -53,8 +53,7 @@ function createNewProject()
 	tree = { "projectID": newProjectID, "projectName": newProjectName, "version": 1, "nextNodeID": 2, "fields": [], "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
   displayProject();
 	
-	saveToDatabase();
-	refreshDataModelDisplay();                                                                              //TODO: temp for displaying the model on the page for debugging purposes 	
+	saveToDatabase();	
 }
 
 function showMenu(e, fieldName)
