@@ -270,25 +270,31 @@
 
 
 
-@field-menu-width: 170px;
+@field-menu-width: 240px;
+@fieldMenuItemHeight: 22px;
 
 #fieldMenu
 {
   top:0px;
   left:600px;
   position:absolute;
-  cursor: pointer;  
+  cursor: pointer;
 }
 
 #fieldMenu ul
 {
   list-style: none;
   padding: 0px;
+  border: 1px solid #30A097;
+  box-shadow: 2px 2px 3px dimgray;
+  -webkit-box-shadow: 2px 2px 3px dimgray;
+  -moz-box-shadow:2px 2px 3px dimgray; 
 }
 
 #fieldMenu ul li
 {
   width: @field-menu-width;
+  height: @fieldMenuItemHeight;
   list-style: none;
   background: #f2f5f6;
 }
@@ -301,7 +307,8 @@
   padding: 0px;
   margin-left: @field-menu-width;
   display: none;
-  visibility: hidden;  
+  visibility: hidden;
+  border: 1px solid #30A097;   
 }
 
 #fieldMenu ul li:hover > ul
@@ -315,118 +322,14 @@
   background: #DFEEF0;
 }
 
-
-/*
-#fieldMenu{
-    height: 39px;
-    font: 12px Geneva, Arial, Helvetica, sans-serif;
-    background: #3AB3A9;
-    border: 1px solid #30A097;  
-    border-radius: 3px;
-    min-width:500px;
-    margin-left: 0px;
-    padding-left: 0px;
-}   
-
-#fieldMenu li{
-    list-style: none;
-    display: block;
-    float: left;
-    height: 40px;
-    position: relative;
-    border-right: 1px solid #52BDB5;
+.arrowRight 
+{
+	width: 0; 
+	height: 0; 
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+	border-left: 6px solid dimgray;
+  float:right;
+  margin-top:(@fieldMenuItemHeight - 8) / 2;
+  margin-right:10px;
 }
-
-#fieldMenu li a{
-    padding: 0px 10px 0px 30px;
-    margin: 0px 0;
-    line-height: 40px;
-    text-decoration: none;
-    border-right: 1px solid #389E96;
-    height: 40px;
-    color: #FFF;
-    text-shadow: 1px 1px 1px #66696B;
-}
-
-#fieldMenu ul{
-    background: #f2f5f6; 
-    padding: 0px;
-    border-bottom: 1px solid #DDDDDD;
-    border-right: 1px solid #DDDDDD;
-    border-left:1px solid #DDDDDD;
-    border-radius: 0px 0px 3px 3px;
-    box-shadow: 2px 2px 3px #ECECEC;
-    -webkit-box-shadow: 2px 2px 3px #ECECEC;
-    -moz-box-shadow:2px 2px 3px #ECECEC;
-    width:170px;
-}
-#fieldMenu .site-name,#fieldMenu .site-name:hover{
-    padding-left: 10px;
-    padding-right: 10px;
-    color: #FFF;
-    text-shadow: 1px 1px 1px #66696B;
-    font: italic 20px/38px Georgia, "Times New Roman", Times, serif;
-    background: url(images/saaraan.png) no-repeat 10px 5px;
-    width: 160px;
-    border-right: 1px solid #52BDB5;
-}
-#fieldMenu .site-name a{
-    width: 129px;
-    overflow:hidden;
-}
-
-#fieldMenu li:hover{
-    background: #3BA39B;
-}
-#fieldMenu li a{
-    display: block;
-}
-#fieldMenu ul li {
-    border-right:none;
-    border-bottom:1px solid #DDDDDD;
-    width:170px;
-    height:39px;
-}
-#fieldMenu ul li a {
-    border-right: none;
-    color:#6791AD;
-    text-shadow: 1px 1px 1px #FFF;
-    border-bottom:1px solid #FFFFFF;
-}
-#fieldMenu ul li:hover{background:#DFEEF0;}
-#fieldMenu ul li:last-child { border-bottom: none;}
-#fieldMenu ul li:last-child a{ border-bottom: none;}
-
-
-#fieldMenu ul{
-    display: none;
-    visibility:hidden;
-    position: absolute;
-    top: 40px;
-}
-
-#fieldMenu ul ul{
-    top: 0px;
-    left:170px;
-    display: none;
-    visibility:hidden;
-    border: 1px solid #DDDDDD;
-}
-
-#fieldMenu ul ul ul{
-    top: 0px;
-    left:170px;
-    display: none;
-    visibility:hidden;
-    border: 1px solid #DDDDDD;
-}
-
-#fieldMenu ul li{
-    display: block;
-    visibility:visible;
-}
-#fieldMenu li:hover > ul{
-    display: block;
-    visibility:visible;
-}
-*/

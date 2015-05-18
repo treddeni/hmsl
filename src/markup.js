@@ -220,20 +220,20 @@ function generateMenuMarkup(menu)
     var item = menu.items[i];
     
     markup += '<li onclick="Menu.handleClick(' + item.id + ');">';
-    
-    if(item.field)
+
+    var checkMarkClass = 'uncheckedMenuItem';
+    if(item.field && item.checked)
     {
-      if(item.checked)
-      {
-        markup += '<img id="menuItem' + item.id + '" src="' + CHECK_MARK_IMAGE_PATH + '" class="checkedMenuItem"/>';
-      }
-      else
-      {
-        markup += '<img id="menuItem' + item.id + '" src="' + CHECK_MARK_IMAGE_PATH + '" class="uncheckedMenuItem"/>';
-      }
+      checkMarkClass = 'checkedMenuItem';
     }
     
+    markup += '<img id="menuItem' + item.id + '" src="' + CHECK_MARK_IMAGE_PATH + '" class="' + checkMarkClass + '"/>';
     markup += item.display;
+    
+    if(item.items && item.items.length > 0)
+    {
+      markup += '<div class="arrowRight"></div>';
+    }
 
     if(item.items && item.items.length > 0)
     {
