@@ -2,7 +2,7 @@ function displayProject()
 {
   $('#project-action-container').html(generateProjectSelectorMarkup());
   $('#fields-header-row').html(generateFieldsRowMarkup());
-  $('#fields-header-row').css('right', scrollBarWidth + 'px');                                              //shorten the width of the fieldsRow by the width of the scroll bar
+  $('#fields-header-row').css('right', scrollBarWidth + 'px');                                      //shorten the width of the fieldsRow by the width of the scroll bar
   $("#data-container").html(generateDataMarkup()); 
 	$("#redips-drag").html(generateTreeMarkup());                                                     //append the markup to the DOM
   $('#redips-drag').css('bottom', scrollBarWidth + 'px');                                           //shorten the height of the tree section by the width of the scroll bar
@@ -24,13 +24,11 @@ function projectActionEnterPressed()
 	if($('#projectActionSelector').val() == 'addField')
 	{
 		var fieldName = $('#projectActionInput').val();
-		tree.fields.push({ "name": fieldName });															                                //add new field to the model
-		addColumn(fieldName);                                                                                 //add column for new field to the view
+		tree.fields.push(new Field(fieldName));                                                               //add new field to the model
+    addColumn(fieldName);                                                                                 //add column for new field to the view
 		
     $('#projectActionInput').hide();
     $('#projectActionSelector').val('blank');
-    
-		refreshDataModelDisplay();                                                                            //TODO: temp for displaying the model on the page for debugging purposes 
 	}	
 }
 
@@ -57,4 +55,13 @@ function createNewProject()
 	
 	saveToDatabase();
 	refreshDataModelDisplay();                                                                              //TODO: temp for displaying the model on the page for debugging purposes 	
+}
+
+function showMenu(e, fieldName)
+{
+  if($('#fieldMenu').length === 0)
+  {
+    $(getFieldMenuMarkup(fieldName, e.clientX, e.clientY)).appendTo('body');
+    $('#fieldMenu').mouseleave(function() { $('#fieldMenu').remove(); });
+  }
 }

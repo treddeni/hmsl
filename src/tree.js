@@ -7,8 +7,8 @@ var GRIPS_WIDTH = 16;
 
 function handleDataScroll()
 {
-  $('#redips-drag').scrollTop($('#data').scrollTop());
-  $('#fieldsRow').scrollLeft($('#data').scrollLeft());
+  $('#redips-drag').scrollTop($('#data-container').scrollTop());
+  $('#fields-header-row').scrollLeft($('#data-container').scrollLeft());
 }
 
 var selectProject = function()

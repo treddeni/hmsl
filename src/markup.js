@@ -174,52 +174,84 @@ function getAssemblyMarkup(nodeID, newNodeID, depth)
 
 function getFieldMenuMarkup(fieldName, x, y)
 {
-  var field = null;
+  var field = Project.getField(fieldName);
+  
+  var menu = {};
+
+  var numberItem = new MenuItem('Number', Field.NUMBER, 'datatype', field);
+  var precisionItem = new MenuItem('Format');
+  
+  precisionItem.items.push(new MenuItem('Number', Field.NUMBER_FORMAT, 'format', field));
+  precisionItem.items.push(new MenuItem('Percent', Field.PERCENT_FORMAT, 'format', field));
+  precisionItem.items.push(new MenuItem('Scientific', Field.SCIENTIFIC_FORMAT, 'format', field));
+  numberItem.items.push(precisionItem);
+  
+  var aggregationItem = new MenuItem('Aggregation');
+  aggregationItem.items.push(new MenuItem('No Aggregation', Field.NO_AGGREGATION, 'agg_type', field));
+  
+  var sumAnyAggItem = new MenuItem('Sum any defined children', Field.SUM_ANY_AGGREGATION, 'agg_type', field);
   
   for(var i = 0; i < tree.fields.length; i++)
   {
-    if(tree.fields[i].name === fieldName)
+    var f = tree.fields[i];
+    
+    if(f.name != field.name)
     {
-      field = tree.fields[i];
+      sumAnyAggItem.items.push(new MenuItem(f.name, f.name, 'agg_qty_field', field));
     }
   }
   
-  if(field == null)
-  {
-    //TODO: handle field not found error
-  }
+  aggregationItem.items.push(sumAnyAggItem);
+  numberItem.items.push(aggregationItem);
   
-  console.log(field.name);
+  menu.items = [];
+  menu.items.push(numberItem);
+  menu.items.push(new MenuItem('Text', Field.STRING, 'datatype', field));
+  menu.items.push(new MenuItem('Choice', Field.CHOICE, 'datatype', field));
   
-  var markup = '<div id="fieldMenu" style="left:' + x + 'px;top:' + y + 'px;"><ul>'
-    + '<li>Number'
-      + '<ul>'
-        + '<li>Precision'
-          + '<ul>'
-            + '<li>Scientific</li>'
-            + '<li>0</li>'
-            + '<li>0.0</li>'
-            + '<li>0.00</li>'
-          + '</ul>'
-        + '</li>'
-        + '<li>Aggregation Type'
-          + '<ul>'
-            + '<li>Sum any defined children'
-              + '<ul>';
-              
-  for(var i = 0; i < tree.fields.length; i++)
-  {
-    markup += '<li>' + tree.fields[i].name + '</li>';
-  }
-              
-       markup += '</ul></li>'
-            + '<li>Do not aggregate</li>'
-          + '</ul>'
-        + '</li>'
-      + '</ul>'
-    + '</li>'
-    + '<li>String</li>'
-    + '<li>Choice</li>'
-  + '</ul></div>';
+  var markup = '<div id="fieldMenu" style="left:' + x + 'px;top:' + y + 'px;">';
+  
+  markup += generateMenuMarkup(menu);
+  
+  markup += '</div>';
   return markup;
+}
+
+function generateMenuMarkup(menu)
+{
+  var markup = '<ul>';
+  
+  for(var i = 0; i < menu.items.length; i++)
+  {
+    var item = menu.items[i];
+    
+    markup += '<li>';
+    
+    if(item.field)
+    {
+      if(item.checked)
+      {
+        markup += '<img src="' + CHECK_MARK_IMAGE_PATH + '" style="margin-right:10px;"/><span onclick="MenuItem.handleClick(\'' + item.field.name + '\', \'' + item.varName + '\', \'' + item.value + '\');">';
+      }
+      else
+      {
+        markup += '<img src="' + CHECK_MARK_IMAGE_PATH + '" style="visibility:hidden;margin-right:10px;"/><span onclick="MenuItem.handleClick(\'' + item.field.name + '\', \'' + item.varName + '\', \'' + item.value + '\');">';
+      }
+    }
+    else
+    {
+      markup += '<span>';
+    }
+    
+    markup += item.display + '</span>';
+
+    if(item.items && item.items.length > 0)
+    {
+      markup += generateMenuMarkup(item);
+    }
+    
+    markup += '</li>';
+  }
+  
+  return markup + '</ul>';
 }

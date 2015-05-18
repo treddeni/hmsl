@@ -9,7 +9,7 @@ var mongo = require('mongodb');
 var database = require('./db');
 var exampleData = require('./test/data/example-data');
 
-var paths = { scripts: ['src/*'], styles: ['public/css/styles.less'] };
+var paths = { scripts: ['src/*', 'src/**/*'], styles: ['public/css/styles.less'] };
 
 gulp.task('clean', function(cb) 
 {
