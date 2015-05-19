@@ -1,3 +1,5 @@
+var DEFAULT_NODE_INPUT_WIDTH = 400;
+
 function generateHeaderMarkup(projects)
 {
   var markup = '<select id="projectSelector" class="form-control" onchange="selectProject()">'
@@ -76,7 +78,7 @@ function addRow(node, depth, ancestors, parent)       //add node and data input 
     markup += hideExpandButton;                                                 //hide the expansion button
   }
 
-  markup += '<input id="nodeInput' + node.id + '" class="node" type="text" value="' + node.name + '" style="width:' + (400-depth*10) + 'px" oninput="updateNodeName(this)"/></div></td></tr>';
+  markup += '<input id="nodeInput' + node.id + '" class="node" type="text" value="' + node.name + '" style="width:' + (DEFAULT_NODE_INPUT_WIDTH-depth*10) + 'px" oninput="updateNodeName(this)"/></div></td></tr>';
 
   if(node.nodes && node.nodes.length > 0)                                       //add the children of this node below this node's row
   {

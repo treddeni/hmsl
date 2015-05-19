@@ -185,7 +185,7 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   
   //TODO: if the old parent is childless now, then hide the old parent's expand/collapse icon
 
-  newParentNode.nodes.push(movedNode);                                                        //add moved node to it's new parent in the model
+  newParentNode.nodes.push(movedNode);                                                                            //add moved node to it's new parent in the model
 
   //fix up the ancestors classes for the moved row
   var movedRow = document.getElementById('rowid' + movedID);
@@ -199,9 +199,10 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   //fix the depth for the moved row
   var oldDepth = getDepth(movedRow);
   var newDepth = getDepth(newParentRow)+1;
-  movedRow.classList.remove('depth' + oldDepth);                                              //remove old depth class
-  movedRow.classList.add('depth' + newDepth);                                                 //add new depth class
-  document.getElementById('expandID' + movedID).style.marginLeft = (10 * newDepth) + 'px';    //change the indent of the moved node
+  movedRow.classList.remove('depth' + oldDepth);                                                                  //remove old depth class
+  movedRow.classList.add('depth' + newDepth);                                                                     //add new depth class
+  document.getElementById('expandID' + movedID).style.marginLeft = (10 * newDepth) + 'px';                        //change the indent of the moved node
+  document.getElementById('nodeInput' + movedID).style.width = (DEFAULT_NODE_INPUT_WIDTH-newDepth*10) + 'px';     //change the indent of the moved node
 
   //move the table rows in the view
   $(movedDataRow).remove();
@@ -209,7 +210,7 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   
   if(movedNode.nodes && movedNode.nodes.length > 0)
   {
-    for(var i = movedNode.nodes.length-1; i >= 0; i--)                                        // iterate backwards to perserve the order of the child nodes
+    for(var i = movedNode.nodes.length-1; i >= 0; i--)                                                            // iterate backwards to perserve the order of the child nodes
     {
       moveNode(movedNode.nodes[i], movedNode.nodes[i].id, movedID, newDepth+1, ancestors);
     }
