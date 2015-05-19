@@ -36,3 +36,17 @@ Project.updateFieldFormatting = function(field)                 //formats all th
     }
 });
 };
+
+Project.switchView = function()
+{
+  if($('#spreadSheetView').length)
+  {
+    $('#spreadSheetView').remove();
+    displayTreeView(tree);
+  }
+  else
+  {
+    $('#tree-container').remove();
+    displaySpreadSheet();
+  }
+};

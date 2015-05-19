@@ -5,11 +5,22 @@
 @cell-height:          21px;
 @project-select-width: 500px;
 
+#tree-container
+{
+  position: absolute;
+  top: @header-height;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+}
+
 #header
 {
   height:   @header-height;
-  position: relative;
-  top:      0px;
+  position: absolute;
+  top:      5px;
+  left:     5px;
+  right:    5px;
 }
 
 #project-action-container
@@ -224,11 +235,11 @@
 
 #resizeLine
 {
-  height:       4000px;
   border-left:  1px dashed black;
   visibility:   hidden;
   position:     absolute;
   top:          0px;
+  bottom:       0px;
   left:         600px;
 
   -webkit-touch-callout: none;
@@ -247,6 +258,11 @@
 .copy-button
 {
   margin: 2px 4px 0px 0px;
+}
+
+#switchViewButton
+{
+  float: right;
 }
 
 #save-database-button
@@ -335,3 +351,43 @@
   margin-top:(@fieldMenuItemHeight - 8) / 2;
   margin-right:10px;
 }
+
+
+	.node {
+    cursor: pointer;
+  }
+
+  .overlay{
+      background-color:#EEE;
+  }
+   
+  .node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+  }
+   
+  .node text {
+    font-size:10px; 
+    font-family:sans-serif;
+  }
+   
+  .link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+  }
+
+  .templink {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px;
+  }
+
+  .ghostCircle.show{
+      display:block;
+  }
+
+  .ghostCircle, .activeDrag .ghostCircle{
+       display: none;
+  }

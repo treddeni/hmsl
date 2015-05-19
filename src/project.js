@@ -1,5 +1,7 @@
-function displayProject()
+function displaySpreadSheet()
 {
+  $('body').append(generateSpreadSheetMarkup());
+  
   $('#project-action-container').html(generateProjectSelectorMarkup());
   $('#fields-header-row').html(generateFieldsRowMarkup());
   $('#fields-header-row').css('right', scrollBarWidth + 'px');                                      //shorten the width of the fieldsRow by the width of the scroll bar
@@ -50,10 +52,10 @@ function createNewProject()
 	$.ajax({ type: 'POST', url: '/api/addProject?projectName=' + newProjectName });                         // add the new project to the projects document in the database
 	
 	//create a top node and tree for the project
-	tree = { "projectID": newProjectID, "projectName": newProjectName, "version": 1, "nextNodeID": 2, "fields": [], "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
-  displayProject();
+	tree = { "projectID": newProjectID, "projectName": newProjectName, "name": newProjectName, "version": 1, "nextNodeID": 2, "fields": [], "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
+  displaySpreadSheet();
 	
-	saveToDatabase();	
+	Project.saveToDatabase();	
 }
 
 function showMenu(e, fieldName)

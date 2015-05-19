@@ -1,5 +1,15 @@
 var DEFAULT_NODE_INPUT_WIDTH = 400;
 
+function generateSpreadSheetMarkup()
+{
+  return '<div id="spreadSheetView">' +
+          '<div id="project-action-container"></div>' +
+          '<div id="fields-header-row"></div>' +
+          '<div id="redips-drag"></div>' +
+          '<div id="data-container" onscroll="handleDataScroll()"></div>' +
+         '</div>';
+}
+
 function generateHeaderMarkup(projects)
 {
   var markup = '<select id="projectSelector" class="form-control" onchange="selectProject()">'
@@ -12,7 +22,8 @@ function generateHeaderMarkup(projects)
 
   markup += '<option id="newProjectOption" value="-1">Create New Project...</option></select>'
   + '<input id="editNewProjectNameInput" class="form-control"></input>'
-  + '<a href="#" id="save-database-button" class="btn btn-default" onclick="Project.saveToDatabase()">Save to Database</a>';
+  + '<a href="#" id="save-database-button" class="btn btn-default" onclick="Project.saveToDatabase()">Save to Database</a>'
+  + '<a href="#" id="switchViewButton" class="btn btn-default" onclick="Project.switchView()">Switch View</a>';
   //markup += '<a href="#" class="btn btn-default" id="save-file-button" onclick="saveLocally()">Save as File</a>';
   
   return markup;

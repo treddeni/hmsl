@@ -12,7 +12,7 @@ router.get('/', function(req, res, next)
 
 router.get('/api/tree', function(req, res, next) 
 {
-  var pid = req.query.projectID;
+  var pid = parseInt(req.query.projectID);
 
   //find the tree with the newest version for the requested project
   db.connection.collection('tree').find({projectID:pid}).sort({version:-1}).limit(1).toArray(function(err, documents)

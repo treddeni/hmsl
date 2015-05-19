@@ -16,7 +16,7 @@ var selectProject = function()
   var projectSelector = document.getElementById('projectSelector');
   var selectedOption = projectSelector.options[projectSelector.selectedIndex];
 
-  if(selectedOption.id == "newProjectOption")
+  if(selectedOption.id === "newProjectOption")
   {
     $('#editNewProjectNameInput').val("Type New Project Name and Press Enter to Create");
     $('#editNewProjectNameInput').show().focus().select();
@@ -31,7 +31,9 @@ var selectProject = function()
     $.ajax({ type: 'GET', url: 'api/tree?projectID=' + projectSelector.value }).done(function(data)               //read tree for the selected project from the database
     {
       tree = data;
-      displayProject();
+      displaySpreadSheet();
+      $('#tree-container').hide();
+      //buildTreeView(tree);
     });  
   }                                                                                                 
 };

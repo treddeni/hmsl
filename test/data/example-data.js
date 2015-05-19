@@ -2,8 +2,9 @@ var projects = { "_id": 1, "nextProjectID": 2, "projects": [ { "id": 1, "name": 
 
 var smallTree = {
   "_id": "55525dd17a68e8501aa22260",
-  "projectID": "1",
+  "projectID": 1,
   "projectName": "Small Test Project",
+  "name": "Small Test Project",
   "version": 1,
   "nextNodeID": 5,
   "fields": [ {"name": "A","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
@@ -53,8 +54,9 @@ var smallTree = {
 
 var largeTree = {
   "_id": "55525dd17a68e8501aa22260",
-  "projectID": "1",
+  "projectID": 1,
   "projectName": "Test Project",
+  "name": "Test Project",
   "version": 2,
   "nextNodeID": 4247,
   "fields": [ {"name": "A","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
