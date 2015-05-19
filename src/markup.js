@@ -108,14 +108,15 @@ function addDataRow(node)
   
   for(var i = 0; i < tree.fields.length; i++)                                        //add the data inputs for each fields
   {
-    if(node.values && node.values[tree.fields[i].name])
+    var field = tree.fields[i];
+
+    var value = '';
+    if(node.values && node.values[field.name])
     {
-      markup += getFieldCellMarkup(tree.fields[i].name, node.id, node.values[tree.fields[i].name]);
+      value = Field.formatValue(field, node.values[field.name]);
     }
-    else
-    {
-      markup += getFieldCellMarkup(tree.fields[i].name, node.id, '');
-    }
+    
+    markup += getFieldCellMarkup(field.name, node.id, value);
   }
   
   markup += '</tr>';
@@ -156,7 +157,7 @@ function getFieldHeaderMarkup(fieldName, index)
 
 function getFieldCellMarkup(fieldName, nodeID, value)
 {  
-  return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + value + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></td>';
+  return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + value + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')" onfocus="displayRawValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></td>';
 }
 
 function getAssemblyMarkup(nodeID, newNodeID, depth)
@@ -173,12 +174,39 @@ function getFieldMenuMarkup(fieldName, x, y)
   var menu = new Menu();
 
   var numberItem = new MenuItem('Number', Field.NUMBER, 'datatype', field);
-  var precisionItem = new MenuItem('Format');
+  var formatItem = new MenuItem('Format');
   
-  precisionItem.items.push(new MenuItem('Number', Field.NUMBER_FORMAT, 'format', field));
-  precisionItem.items.push(new MenuItem('Percent', Field.PERCENT_FORMAT, 'format', field));
-  precisionItem.items.push(new MenuItem('Scientific', Field.SCIENTIFIC_FORMAT, 'format', field));
-  numberItem.items.push(precisionItem);
+  var numberFormatItem = new MenuItem('Number', Field.NUMBER_FORMAT, 'format', field);
+  numberFormatItem.items.push(new MenuItem('0', 0, 'precision', field));
+  var displayString = '0.';
+  for(var i = 1; i < 11; i++)
+  {
+    displayString += '0';
+    numberFormatItem.items.push(new MenuItem(displayString, i, 'precision', field));
+  }
+  formatItem.items.push(numberFormatItem);
+  
+  var percentFormatItem = new MenuItem('Percent', Field.PERCENT_FORMAT, 'format', field);
+  percentFormatItem.items.push(new MenuItem('0', 0, 'precision', field));
+  var displayString = '0.';
+  for(var i = 1; i < 11; i++)
+  {
+    displayString += '0';
+    percentFormatItem.items.push(new MenuItem(displayString + '%', i, 'precision', field));
+  }
+  formatItem.items.push(percentFormatItem);
+  
+  var scientificFormatItem = new MenuItem('Scientific', Field.SCIENTIFIC_FORMAT, 'format', field);
+  scientificFormatItem.items.push(new MenuItem('0', 0, 'precision', field));
+  var displayString = '0.';
+  for(var i = 1; i < 11; i++)
+  {
+    displayString += '0';
+    scientificFormatItem.items.push(new MenuItem(displayString + 'e+0', i, 'precision', field));
+  }
+  formatItem.items.push(scientificFormatItem);  
+  
+  numberItem.items.push(formatItem);
   
   var aggregationItem = new MenuItem('Aggregation');
   aggregationItem.items.push(new MenuItem('No Aggregation', Field.NO_AGGREGATION, 'agg_type', field));
@@ -201,7 +229,7 @@ function getFieldMenuMarkup(fieldName, x, y)
   menu.items = [];
   menu.items.push(numberItem);
   menu.items.push(new MenuItem('Text', Field.STRING, 'datatype', field));
-  menu.items.push(new MenuItem('Choice', Field.CHOICE, 'datatype', field));
+  //TODO: menu.items.push(new MenuItem('Choice', Field.CHOICE, 'datatype', field));
   
   var markup = '<div id="fieldMenu" style="left:' + x + 'px;top:' + y + 'px;">';
   

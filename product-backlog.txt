@@ -2,9 +2,7 @@ Incomplete User Stories
 -----------------------
 - Resize a column
 - Edit a field's name
-- Choose the data type of a field.  Choices should be number, choice, and string.
 - Choose how a field should aggregate, by selecting whether a field aggregates or not, and the field used for the quantity in the aggregation
-- Set the display precision for a field
 - Change the order in which the fields are displayed
 - Delete a field from a project
 - Choose a previous version of the project to open
@@ -15,8 +13,6 @@ Incomplete User Stories
 
 Bugs/Issues
 -----------
-- Field headers should be visible when scrolling down
-- Node names should be visible when scrolling right
 - Check for uniqueness of a new project's name
 - Improve/cleanup the UI and styling
 - Add error checking and error handling
@@ -25,6 +21,7 @@ Bugs/Issues
 
 Future User Stories
 -------------------
+- Choice field datatype
 - Delete a project
 - Edit a project's name
 - Attempt to merge new project versions with old versions, when the user saves a project
@@ -61,3 +58,5 @@ Completed User Stories
 - Edit a node's value for a field
 - Automatically aggregate field values when the user changes a node's field value
 - Navigate rows and columns using the arrow keys
+- Choose the data type of a field.  Number and String datatypes completed.
+- Set the display precision for a field

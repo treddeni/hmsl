@@ -41,6 +41,22 @@ function printProject()
   console.log(JSON.stringify(tree, null, '\t'));
 }
 
+function displayRawValue(fieldName, nodeID)
+{
+  var field = Project.getField(fieldName);
+  var node = findNodeInTree(parseInt(nodeID));
+  
+  if(node.values && node.values[field.name])
+  {
+    console.log(node.values[field.name]);
+    $('#' + fieldName + nodeID).val(node.values[field.name]);
+  }  
+  else
+  {
+    $('#' + fieldName + nodeID).val('');
+  }
+}
+
 var getDepth = function(row)
 {
   var classes = row.className.split(' ');
