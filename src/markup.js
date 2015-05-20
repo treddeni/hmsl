@@ -56,9 +56,9 @@ function generateTreeMarkup()
 {
   var markup = '<table id="treeTable">';
 
-  for(var i = 0; i < tree.nodes.length; i++)        //add row for each node
+  for(var i = 0; i < tree.children.length; i++)        //add row for each node
   {
-    markup += addRow(tree.nodes[i], 0, '', 0);
+    markup += addRow(tree.children[i], 0, '', 0);
   }
 
   markup += '</table>';
@@ -80,7 +80,7 @@ function addRow(node, depth, ancestors, parent)       //add node and data input 
   markup += '<tr id="rowid' + nodeID + '" class="' + classes + '"><td class="redips-rowhandler cell"><div class="node-container">';
   markup += deleteButton + copyButton + dragHandle;
 
-  if(node.nodes && node.nodes.length > 0)                                       //if node is a parent
+  if(node.children && node.children.length > 0)                                       //if node is a parent
   {
     markup += showExpandButton;                                                 //show the expansion button
   }
@@ -91,11 +91,11 @@ function addRow(node, depth, ancestors, parent)       //add node and data input 
 
   markup += '<input id="nodeInput' + node.id + '" class="nodeTextInput" type="text" value="' + node.name + '" style="width:' + (DEFAULT_NODE_INPUT_WIDTH-depth*10) + 'px" oninput="updateNodeName(this)"/></div></td></tr>';
 
-  if(node.nodes && node.nodes.length > 0)                                       //add the children of this node below this node's row
+  if(node.children && node.children.length > 0)                                       //add the children of this node below this node's row
   {
-    for(var i = 0; i < node.nodes.length; i++)
+    for(var i = 0; i < node.children.length; i++)
     {
-      markup += addRow(node.nodes[i], depth+1, ancestors + ' ancestor' + nodeID, nodeID);
+      markup += addRow(node.children[i], depth+1, ancestors + ' ancestor' + nodeID, nodeID);
     }
   }
 
@@ -106,9 +106,9 @@ function generateDataMarkup()
 {
   var markup = '<table id="dataTable">';
 
-  for(var i = 0; i < tree.nodes.length; i++)        //add row for each node
+  for(var i = 0; i < tree.children.length; i++)        //add row for each node
   {
-    markup += addDataRow(tree.nodes[i]);
+    markup += addDataRow(tree.children[i]);
   }
 
   markup += '</table>';
@@ -134,11 +134,11 @@ function addDataRow(node)
   
   markup += '</tr>';
   
-  if(node.nodes && node.nodes.length > 0)                                       //add the children of this node below this node's row
+  if(node.children && node.children.length > 0)                                       //add the children of this node below this node's row
   {
-    for(var i = 0; i < node.nodes.length; i++)
+    for(var i = 0; i < node.children.length; i++)
     {
-      markup += addDataRow(node.nodes[i]);
+      markup += addDataRow(node.children[i]);
     }
   }  
   

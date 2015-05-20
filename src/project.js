@@ -52,7 +52,7 @@ function createNewProject()
 	$.ajax({ type: 'POST', url: '/api/addProject?projectName=' + newProjectName });                         // add the new project to the projects document in the database
 	
 	//create a top node and tree for the project
-	tree = { "projectID": newProjectID, "projectName": newProjectName, "name": newProjectName, "version": 1, "nextNodeID": 2, "fields": [], "nodes": [{ "id": 1, "name": newProjectName, "nodes": [] }] };
+	tree = { "projectID": newProjectID, "projectName": newProjectName, "name": newProjectName, "version": 1, "nextNodeID": 2, "fields": [], "children": [{ "id": 1, "name": newProjectName, "children": [] }] };
   displaySpreadSheet();
 	
 	Project.saveToDatabase();	

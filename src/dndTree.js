@@ -3,65 +3,74 @@ function displayTreeView(treeData)
 {
   $('body').append('<div id="tree-container"></div>');
 
+  // Calculate total nodes, max label length
   var totalNodes = 0;
   var maxLabelLength = 0;
+  // variables for drag/drop
   var selectedNode = null;
   var draggingNode = null;
+  // panning variables
   var panSpeed = 200;
   var panBoundary = 20; // Within 20px from edges will pan when dragging.
+  // Misc. variables
   var i = 0;
   var duration = 750;
   var root;
+
+  // size of the diagram
   var viewerWidth = $('#tree-container').width();
   var viewerHeight = $('#tree-container').height();
 
-  var tree = d3.layout.tree().size([viewerHeight, viewerWidth]);
-  
-  tree.children(function(d){ return d.nodes; });                                        //set the children function to reference the nodes in the tree model
+  var tree = d3.layout.tree()
+      .size([viewerHeight, viewerWidth]);
 
-  var diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; });      // define a d3 diagonal projection for use by the node paths later on.
+  // define a d3 diagonal projection for use by the node paths later on.
+  var diagonal = d3.svg.diagonal()
+      .projection(function(d) {
+          return [d.y, d.x];
+      });
 
-  function visit(parent, visitFn, childrenFn)                                           // A recursive helper function for performing some setup by walking through all nodes
-  {
-    if (!parent) { return; }
-    visitFn(parent);
+  // A recursive helper function for performing some setup by walking through all nodes
 
-    var children = childrenFn(parent);
-    if (children) 
-    {
-      var count = children.length;
-      for (var i = 0; i < count; i++) 
-      {
-          visit(children[i], visitFn, childrenFn);
+  function visit(parent, visitFn, childrenFn) {
+      if (!parent) return;
+
+      visitFn(parent);
+
+      var children = childrenFn(parent);
+      if (children) {
+          var count = children.length;
+          for (var i = 0; i < count; i++) {
+              visit(children[i], visitFn, childrenFn);
+          }
       }
-    }
   }
 
-  visit(treeData, function(d)                                                           // Call visit function to establish maxLabelLength
-  {
+  // Call visit function to establish maxLabelLength
+  visit(treeData, function(d) {
       totalNodes++;
       maxLabelLength = Math.max(d.name.length, maxLabelLength);
 
-  }, function(d) 
-  {
-      return d.nodes && d.nodes.length > 0 ? d.nodes : null;
+  }, function(d) {
+      return d.children && d.children.length > 0 ? d.children : null;
   });
 
-  function sortTree()                                                                   // sort the tree according to the node names
-  {
-    tree.sort(function(a, b) 
-    {
-      return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
-    });
-  }
-  
-  sortTree();                                                                           // Sort the tree initially incase the JSON isn't in a sorted order.
 
-  function pan(domNode, direction)                                                      // TODO: Pan function, can be better implemented.
-  {
+  // sort the tree according to the node names
+
+  function sortTree() {
+      tree.sort(function(a, b) {
+          return b.name.toLowerCase() < a.name.toLowerCase() ? 1 : -1;
+      });
+  }
+  // Sort the tree initially incase the JSON isn't in a sorted order.
+  sortTree();
+
+  // TODO: Pan function, can be better implemented.
+
+  function pan(domNode, direction) {
       var speed = panSpeed;
-      if (panTimer) 
-      {
+      if (panTimer) {
           clearTimeout(panTimer);
           translateCoords = d3.transform(svgGroup.attr("transform"));
           if (direction == 'left' || direction == 'right') {
@@ -84,54 +93,53 @@ function displayTreeView(treeData)
       }
   }
 
-  function zoom()       // Define the zoom function for the zoomable tree
-  {
+  // Define the zoom function for the zoomable tree
+
+  function zoom() {
       svgGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
   }
 
-  var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);                           // define the zoomListener which calls the zoom function on the "zoom" event constrained within the scaleExtents
 
-  function initiateDrag(d, domNode) 
-  {
+  // define the zoomListener which calls the zoom function on the "zoom" event constrained within the scaleExtents
+  var zoomListener = d3.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", zoom);
+
+  function initiateDrag(d, domNode) {
       draggingNode = d;
       d3.select(domNode).select('.ghostCircle').attr('pointer-events', 'none');
       d3.selectAll('.ghostCircle').attr('class', 'ghostCircle show');
       d3.select(domNode).attr('class', 'node activeDrag');
 
-      svgGroup.selectAll("g.node").sort(function(a, b)                                                    // select the parent and sort the path's
-      { 
-          if (a.id != draggingNode.id) return 1;                                                          // a is not the hovered element, send "a" to the back
-          else return -1;                                                                                 // a is the hovered element, bring "a" to the front
+      svgGroup.selectAll("g.node").sort(function(a, b) { // select the parent and sort the path's
+          if (a.id != draggingNode.id) return 1; // a is not the hovered element, send "a" to the back
+          else return -1; // a is the hovered element, bring "a" to the front
       });
-      
-      if (nodes.length > 1)                                                                               // if nodes has children, remove the links and nodes
-      {
-          links = tree.links(nodes);                                                                      // remove link paths
-          
-          nodePaths = svgGroup.selectAll("path.link").data(links, function(d) 
-          {
-              return d.target.id;
-          }).remove();
-          
-          nodesExit = svgGroup.selectAll("g.node")                                                        // remove child nodes
-          .data(nodes, function(d) 
-          {
-              return d.id;
-          })
-          .filter(function(d, i) 
-          {
-              if (d.id == draggingNode.id) {
-                  return false;
-              }
-              return true;
-          }).remove();
+      // if nodes has children, remove the links and nodes
+      if (nodes.length > 1) {
+          // remove link paths
+          links = tree.links(nodes);
+          nodePaths = svgGroup.selectAll("path.link")
+              .data(links, function(d) {
+                  return d.target.id;
+              }).remove();
+          // remove child nodes
+          nodesExit = svgGroup.selectAll("g.node")
+              .data(nodes, function(d) {
+                  return d.id;
+              }).filter(function(d, i) {
+                  if (d.id == draggingNode.id) {
+                      return false;
+                  }
+                  return true;
+              }).remove();
       }
 
       // remove parent link
       parentLink = tree.links(tree.nodes(draggingNode.parent));
-      svgGroup.selectAll('path.link').filter(function(d, i) 
-      {
-          return d.target.id == draggingNode.id;
+      svgGroup.selectAll('path.link').filter(function(d, i) {
+          if (d.target.id == draggingNode.id) {
+              return true;
+          }
+          return false;
       }).remove();
 
       dragStarted = null;
@@ -148,7 +156,6 @@ function displayTreeView(treeData)
   // Define the drag listeners for drag/drop behaviour of nodes.
   dragListener = d3.behavior.drag()
       .on("dragstart", function(d) {
-        console.log('dragstart');
           if (d == root) {
               return;
           }
@@ -194,40 +201,40 @@ function displayTreeView(treeData)
           var node = d3.select(this);
           node.attr("transform", "translate(" + d.y0 + "," + d.x0 + ")");
           updateTempConnector();
-      }).on("dragend", function(d) 
-      {
-        console.log('dragend');
-          if (d == root) { return; }
+      }).on("dragend", function(d) {
+          if (d == root) {
+              return;
+          }
           domNode = this;
-          
-          if (selectedNode) 
-          {
+          if (selectedNode) {
               // now remove the element from the parent, and insert it into the new elements children
               var index = draggingNode.parent.children.indexOf(draggingNode);
-              if (index > -1) 
-              {
+              if (index > -1) {
                   draggingNode.parent.children.splice(index, 1);
               }
-
-              selectedNode.nodes.push(draggingNode);
-
+              if (selectedNode.children || selectedNode._children) {
+                if (selectedNode.children) {
+                    selectedNode.children.push(draggingNode);
+                } else {
+                    selectedNode._children.push(draggingNode);
+                }  
+              } else {
+                  selectedNode.children = [];
+                  selectedNode.children.push(draggingNode);
+              }
               // Make sure that the node being added to is expanded so user can see added node is correctly moved
               expand(selectedNode);
               sortTree();
               endDrag();
-          } else 
-          {
+          } else {
               endDrag();
           }
       });
 
-  function endDrag() 
-  {
-    console.log(domNode);
+  function endDrag() {
       selectedNode = null;
       d3.selectAll('.ghostCircle').attr('class', 'ghostCircle');
       d3.select(domNode).attr('class', 'node');
-    console.log(domNode);  
       // now restore the mouseover event or we won't be able to drag a 2nd time
       d3.select(domNode).select('.ghostCircle').attr('pointer-events', '');
       updateTempConnector();
@@ -331,16 +338,29 @@ function displayTreeView(treeData)
   }
 
   function update(source) {
+    var computeNodeSize = function(node, field)
+    {
+      if(node.values && node.values[field] && node.values[field] > 5)
+      {
+        return node.values[field];
+      }
+      else
+      {
+        return 5;
+      }        
+    };
+    
       // Compute the new height, function counts total children of root node and sets tree height accordingly.
       // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
       // This makes the layout more consistent.
       var levelWidth = [1];
       var childCount = function(level, n) {
-          if (n.nodes && n.nodes.length > 0) {
+
+          if (n.children && n.children.length > 0) {
               if (levelWidth.length <= level + 1) levelWidth.push(0);
 
-              levelWidth[level + 1] += n.nodes.length;
-              n.nodes.forEach(function(d) {
+              levelWidth[level + 1] += n.children.length;
+              n.children.forEach(function(d) {
                   childCount(level + 1, d);
               });
           }
@@ -425,7 +445,7 @@ function displayTreeView(treeData)
 
       // Change the circle fill depending on whether it has children and is collapsed
       node.select("circle.nodeCircle")
-          .attr("r", 4.5)
+          .attr("r", function(d) { return computeNodeSize(d); })
           .style("fill", function(d) {
               return d._children ? "lightsteelblue" : "#fff";
           });
@@ -509,6 +529,11 @@ function displayTreeView(treeData)
   root = treeData;
   root.x0 = viewerHeight / 2;
   root.y0 = 0;
+
+  // Collapse all children of roots children before rendering.
+  //root.children.forEach(function(child){
+  //	collapse(child);
+  //});
 
   // Layout the tree initially and center on the root node.
   update(root);

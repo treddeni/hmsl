@@ -1,6 +1,6 @@
 function aggregate_any(node, field)
 {
-  if(!node.nodes || node.nodes.length === 0)
+  if(!node.children || node.children.length === 0)
   {
     if(!node.values || !node.values[field])
     {
@@ -15,9 +15,9 @@ function aggregate_any(node, field)
   {
     var childrenSum = 0.0;
 
-    for(var i = 0; i < node.nodes.length; i++)
+    for(var i = 0; i < node.children.length; i++)
     {
-      childrenSum += aggregate_any(node.nodes[i], field);
+      childrenSum += aggregate_any(node.children[i], field);
     }
 
     if(!node.values)

@@ -57,9 +57,14 @@ gulp.task('seed_small', function()
 {
   mongo.connect(database.url, function (err, db) 
   {
-    db.collection('tree').remove({});
-    db.collection('projects').remove({});
-    db.collection('tree').insert(exampleData.smallTree);
-    db.collection('projects').insert(exampleData.projects);
+    db.collection('tree').remove({}, function() 
+    { 
+      db.collection('tree').insert(exampleData.smallTree); 
+    });
+    
+    db.collection('projects').remove({}, function() 
+    { 
+      db.collection('projects').insert(exampleData.projects); 
+    });
   });
 });

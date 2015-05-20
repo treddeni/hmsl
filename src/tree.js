@@ -31,9 +31,10 @@ var selectProject = function()
     $.ajax({ type: 'GET', url: 'api/tree?projectID=' + projectSelector.value }).done(function(data)               //read tree for the selected project from the database
     {
       tree = data;
-      displaySpreadSheet();
-      $('#tree-container').hide();
-      //buildTreeView(tree);
+      //displaySpreadSheet();
+      //$('#tree-container').hide();
+      displayTreeView(tree);
+      $('#spreadSheetView').hide();
     });  
   }                                                                                                 
 };
@@ -161,13 +162,13 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
 
   if(oldParentNode)
   {
-    if(oldParentNode.nodes && oldParentNode.nodes.length > 0)                                 //remove the moved node from it's old parent in the model
+    if(oldParentNode.children && oldParentNode.children.length > 0)                                 //remove the moved node from it's old parent in the model
     {
-      for (var i = 0; i < oldParentNode.nodes.length; i++)
+      for (var i = 0; i < oldParentNode.children.length; i++)
       {
-        if (oldParentNode.nodes[i].id === movedID)
+        if (oldParentNode.children[i].id === movedID)
         {
-          oldParentNode.nodes.splice(i, 1);
+          oldParentNode.children.splice(i, 1);
           break;
         }
       }
@@ -175,11 +176,11 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   }
   else
   {
-    for (var i = 0; i < tree.nodes.length; i++)
+    for (var i = 0; i < tree.children.length; i++)
     {
-      if (tree.nodes[i].id === movedID)
+      if (tree.children[i].id === movedID)
       {
-        tree.nodes.splice(i, 1);
+        tree.children.splice(i, 1);
         break;
       }
     }    
@@ -187,7 +188,7 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   
   //TODO: if the old parent is childless now, then hide the old parent's expand/collapse icon
 
-  newParentNode.nodes.push(movedNode);                                                                            //add moved node to it's new parent in the model
+  newParentNode.children.push(movedNode);                                                                            //add moved node to it's new parent in the model
 
   //fix up the ancestors classes for the moved row
   var movedRow = document.getElementById('rowid' + movedID);
@@ -210,11 +211,11 @@ var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)    
   $(movedDataRow).remove();
   $(movedDataRow).insertAfter(parentDataRow);   
   
-  if(movedNode.nodes && movedNode.nodes.length > 0)
+  if(movedNode.children && movedNode.children.length > 0)
   {
-    for(var i = movedNode.nodes.length-1; i >= 0; i--)                                                            // iterate backwards to perserve the order of the child nodes
+    for(var i = movedNode.children.length-1; i >= 0; i--)                                                            // iterate backwards to perserve the order of the child nodes
     {
-      moveNode(movedNode.nodes[i], movedNode.nodes[i].id, movedID, newDepth+1, ancestors);
+      moveNode(movedNode.children[i], movedNode.children[i].id, movedID, newDepth+1, ancestors);
     }
   }
 };
@@ -243,22 +244,22 @@ var moveNode = function(node, nodeID, parentID, newDepth, ancestors)
   $(nodeDataRow).remove();
   $(nodeDataRow).insertAfter(parentDataRow);  
 
-  if(node.nodes && node.nodes.length > 0)
+  if(node.children && node.children.length > 0)
   {
-    for(var i = node.nodes.length-1; i >= 0; i--)                                           // iterate backwards to perserve the order of the child nodes
+    for(var i = node.children.length-1; i >= 0; i--)                                           // iterate backwards to perserve the order of the child nodes
     {
-      moveNode(node.nodes[i], node.nodes[i].id, nodeID, newDepth+1, newAncestors);
+      moveNode(node.children[i], node.children[i].id, nodeID, newDepth+1, newAncestors);
     }
   }
 };
 
 var findNodeInTree = function(nodeID)
 {
-  if(tree.nodes && tree.nodes.length > 0)
+  if(tree.children && tree.children.length > 0)
   {
-    for(var i = 0; i < tree.nodes.length; i++)
+    for(var i = 0; i < tree.children.length; i++)
     {
-      var foundNode = findNode(nodeID, tree.nodes[i]);
+      var foundNode = findNode(nodeID, tree.children[i]);
 
       if(foundNode) { return foundNode; }
     }
@@ -273,11 +274,11 @@ var findNode = function(nodeID, node)
   }
   else
   {
-    if(node.nodes && node.nodes.length > 0)
+    if(node.children && node.children.length > 0)
     {
-      for(var i = 0; i < node.nodes.length; i++)
+      for(var i = 0; i < node.children.length; i++)
       {
-        var foundNode = findNode(nodeID, node.nodes[i]);
+        var foundNode = findNode(nodeID, node.children[i]);
 
         if(foundNode) { return foundNode; }
       }
@@ -287,11 +288,11 @@ var findNode = function(nodeID, node)
 
 var findParentInTree = function(nodeID)
 {
-  if(tree.nodes && tree.nodes.length > 0)
+  if(tree.children && tree.children.length > 0)
   {
-    for(var i = 0; i < tree.nodes.length; i++)
+    for(var i = 0; i < tree.children.length; i++)
     {
-        var foundParent = findParent(nodeID, tree.nodes[i], null);
+        var foundParent = findParent(nodeID, tree.children[i], null);
 
         if(foundParent) { return foundParent; }
     }
@@ -306,11 +307,11 @@ var findParent = function(nodeID, node, parent)
   }
   else
   {
-    if(node.nodes && node.nodes.length > 0)
+    if(node.children && node.children.length > 0)
     {
-      for(var i = 0; i < node.nodes.length; i++)
+      for(var i = 0; i < node.children.length; i++)
       {
-        var foundParent = findParent(nodeID, node.nodes[i], node);
+        var foundParent = findParent(nodeID, node.children[i], node);
 
         if(foundParent) { return foundParent; }
       }
@@ -331,11 +332,11 @@ var deleteNode = function(el)
   //TODO: if parent is childless now, then hide the parent's expand/collapse icon 
   
   //remove the node from the model
-  for(var i = 0; i < parentNode.nodes.length; i++)
+  for(var i = 0; i < parentNode.children.length; i++)
   {
-    if(parentNode.nodes[i].id == nodeID)
+    if(parentNode.children[i].id == nodeID)
     {
-      parentNode.nodes.splice(i, 1);
+      parentNode.children.splice(i, 1);
       break;
     }
   }
@@ -346,11 +347,11 @@ var removeNodeRow = function(node)
   var row = document.getElementById('rowid' + node.id);
   $(row).remove();
   
-  if(node.nodes && node.nodes.length > 0)
+  if(node.children && node.children.length > 0)
   {
-    for(var i = 0; i < node.nodes.length; i++)
+    for(var i = 0; i < node.children.length; i++)
     {
-      removeNodeRow(node.nodes[i]);
+      removeNodeRow(node.children[i]);
     }
   }
 };
@@ -370,14 +371,14 @@ var copyNode = function(source)
   
   if(sourceParentNode === undefined)                                                //handle case where the user tries to copy a top level node
   {
-    nodeIndex = getNodeIndex(tree.nodes, sourceNode.id);                            
-    tree.nodes.splice(nodeIndex, 0, newNode);
+    nodeIndex = getNodeIndex(tree.children, sourceNode.id);                            
+    tree.children.splice(nodeIndex, 0, newNode);
     newRowMarkup = addRow(newNode, 0, '', 0);    
   }
   else
   {
-    nodeIndex = getNodeIndex(sourceParentNode.nodes, sourceNode.id);
-    sourceParentNode.nodes.splice(nodeIndex, 0, newNode);
+    nodeIndex = getNodeIndex(sourceParentNode.children, sourceNode.id);
+    sourceParentNode.children.splice(nodeIndex, 0, newNode);
     newRowMarkup = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
   }
   
@@ -390,18 +391,18 @@ var assignNewNodeIDs = function(node)
 {
   node.id = tree.nextNodeID++;
   
-  if(node.nodes && node.nodes.length > 0)
+  if(node.children && node.children.length > 0)
   {
-    for(var i = 0; i < node.nodes.length; i++)
+    for(var i = 0; i < node.children.length; i++)
     {
-      assignNewNodeIDs(node.nodes[i]);
+      assignNewNodeIDs(node.children[i]);
     }
   }
 };
 
-var getNodeIndex = function(nodes, id)
+var getNodeIndex = function(children, id)
 {
-  var indexes = $.map(nodes, function(obj, index) 
+  var indexes = $.map(children, function(obj, index) 
   {
     if(obj.id == id) 
     {
@@ -487,9 +488,9 @@ function updateFieldValue(field, id)
 {
   updateNodeValueInTree(id, field, document.getElementById(field + id).value);
 
-  for(var i = 0; i < tree.nodes.length; i++)
+  for(var i = 0; i < tree.children.length; i++)
   {
-    aggregate_any(tree.nodes[i], field);
+    aggregate_any(tree.children[i], field);
   } 
 }
 
@@ -497,9 +498,9 @@ function updateNodeValueInTree(id, field, value)
 {
   var node = null;
 
-  for(var i = 0; i < tree.nodes.length; i++)
+  for(var i = 0; i < tree.children.length; i++)
   {
-    node = tree.nodes[i];
+    node = tree.children[i];
     
     if(node.id == id)
     {
@@ -522,11 +523,11 @@ function updateNodeValue(id, node, field, value)
     return node;
   }
 
-  if(node && node.nodes && node.nodes.length > 0)
+  if(node && node.children && node.children.length > 0)
   {
-    for(var i = 0; i < node.nodes.length; i++)
+    for(var i = 0; i < node.children.length; i++)
     {
-      found = updateNodeValue(id, node.nodes[i], field, value);
+      found = updateNodeValue(id, node.children[i], field, value);
 
       if(found)
       {
