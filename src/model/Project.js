@@ -37,6 +37,11 @@ Project.updateFieldFormatting = function(field)                 //formats all th
 });
 };
 
+Project.getTree = function()
+{
+  return tree;
+}
+
 Project.switchView = function()
 {
   if($('#spreadSheetView').length)

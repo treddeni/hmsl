@@ -258,9 +258,9 @@ var findNodeInTree = function(nodeID)
   {
     for(var i = 0; i < tree.nodes.length; i++)
     {
-        var foundNode = findNode(nodeID, tree.nodes[i]);
+      var foundNode = findNode(nodeID, tree.nodes[i]);
 
-        if(foundNode) { return foundNode; }
+      if(foundNode) { return foundNode; }
     }
   }
 };
