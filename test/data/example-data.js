@@ -7,6 +7,7 @@ var smallTree = {
   "name": "Small Test Project",
   "version": 1,
   "nextNodeID": 5,
+  "depth": 0,
   "fields": [ {"name": "A","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
               {"name": "B","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
               {"name": "C","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
@@ -21,6 +22,7 @@ var smallTree = {
   "children": [{
     "id": 1,
     "name": "node1",
+    "depth": 1,
     "values":
     {
       "Weight": 1.2,
@@ -31,6 +33,7 @@ var smallTree = {
       {
         "id": 2,
         "name": "node1.1",
+        "depth": 2,
         "values":
         {
           "Weight": 1.3,
@@ -40,6 +43,7 @@ var smallTree = {
           {
             "id": 3,
             "name": "node1.1.1",
+            "depth": 2,
             "children": []
           }
         ]
@@ -47,6 +51,7 @@ var smallTree = {
       {
         "id": 4,
         "name": "node1.2",
+        "depth": 1,
         "children": []
       }
     ]

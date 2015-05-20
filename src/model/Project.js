@@ -37,6 +37,14 @@ Project.updateFieldFormatting = function(field)                 //formats all th
 });
 };
 
+Project.cleanseTree = function()
+{
+  visit(tree, getChildren, function(node)
+  {
+    delete node.parent;
+  });
+};
+
 Project.getTree = function()
 {
   return tree;

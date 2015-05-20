@@ -60,100 +60,6 @@ function displayRawValue(fieldName, nodeID)
   }
 }
 
-var getDepth = function(row)
-{
-  var classes = row.className.split(' ');
-
-  for(var i = 0; i < classes.length; i++)
-  {
-    var c = classes[i];
-
-    if(c.indexOf('depth') > -1)
-    {
-      return parseInt(c.replace('depth', ''));
-    }
-  }
-};
-
-var getParentID = function(row)
-{
-  var classes = row.className.split(' ');
-
-  for(var i = 0; i < classes.length; i++)
-  {
-    var c = classes[i];
-
-    if(c.indexOf('parent') > -1)
-    {
-      return parseInt(c.replace('parent', ''));
-    }
-  }
-};
-
-var removeParent = function(row)
-{
-  var classes = row.className.split(' ');
-
-  for(var i = 0; i < classes.length; i++)
-  {
-    var c = classes[i];
-
-    if(c.indexOf('parent') > -1)
-    {
-      row.classList.remove(c);
-    }
-  }
-};
-
-var getAncestors = function(row)
-{
-  var ancestors = [];
-  var classes = row.className.split(' ');
-
-  for(var i = 0; i < classes.length; i++)
-  {
-    var c = classes[i];
-
-    if(c.indexOf('ancestor') > -1)
-    {
-      ancestors.push(c);
-    }
-  }
-
-  return ancestors;
-};
-
-var removeAncestors = function(row)
-{
-  var classes = row.className.split(' ');
-
-  for(var i = 0; i < classes.length; i++)
-  {
-    var c = classes[i];
-
-    if(c.indexOf('ancestor') > -1)
-    {
-      row.classList.remove(c);
-    }
-  }
-};
-
-var addAncestors = function(row, ancestors)
-{
-  for(var i = 0; i < ancestors.length; i++)
-  {
-    row.classList.add(ancestors[i]);
-  }
-};
-
-var setNewAncestors = function(row, ancestors, parentID)
-{
-  removeParent(row);
-  row.classList.add('parent' + parentID);
-  removeAncestors(row);
-  addAncestors(row, ancestors);
-};
-
 var moveAssembly = function(movedID, newParentID, oldParentID, newParentRow)                  //move the node/assembly in the view and the model, including all descendant nodes
 {
   var oldParentNode = findNodeInTree(oldParentID);
@@ -379,7 +285,7 @@ var copyNode = function(source)
   {
     nodeIndex = getNodeIndex(sourceParentNode.children, sourceNode.id);
     sourceParentNode.children.splice(nodeIndex, 0, newNode);
-    newRowMarkup = getAssemblyMarkup(newNode.id, sourceNode.id, getDepth(sourceRow));
+    newRowMarkup = getAssemblyMarkup(newNode.id, sourceNode.id, sourceNode.depth);
   }
   
   $(newRowMarkup).insertBefore(sourceRow);
@@ -427,50 +333,72 @@ var getAncestorTag = function upTo(el, tagName)
   }
 };
 
-function toggle(el)
+// A recursive helper function for performing some setup by walking through all nodes
+function visit(parent, childrenFn, visitFn) 
 {
-  var row = getAncestorTag(el, 'tr');
-  var id = parseInt(row.id.replace('rowid', ''));
-  var icon = document.getElementById('icon' + id);
+    if (!parent) { return; }
 
-  if(row.classList.contains('collapsed'))
+    visitFn(parent);
+    var children = childrenFn(parent);
+    
+    if (children) 
+    {
+        for (var i = 0; i < children.length; i++) 
+        {
+            visit(children[i], childrenFn, visitFn);
+        }
+    }
+}
+
+function visitDescendants(parent, childrenFn, visitFn)
+{
+  if(!parent) { return; }
+  
+  if(parent.children && parent.children.length > 0)
   {
-    var children = document.querySelectorAll('.parent' + id);
-    var childrenIcons = document.querySelectorAll('.iconp' + id);
-
-    for(var i = 0; i < children.length; i++)
+    for(var i in parent.children)
     {
-      children[i].style.display = '';
-      children[i].classList.add('collapsed');
+      visit(parent.children[i], childrenFn, visitFn);
     }
-
-    for(var i = 0; i < childrenIcons.length; i++)
-    {
-      if(childrenIcons[i].classList.contains('glyphicon-chevron-down'))
-      {
-        childrenIcons[i].classList.remove('glyphicon-chevron-down');
-        childrenIcons[i].classList.add('glyphicon-chevron-right');
-      }
-    }
-
-    icon.classList.remove('glyphicon-chevron-right');
-    icon.classList.add('glyphicon-chevron-down');
-    row.classList.remove('collapsed');
-    row.classList.add('expanded');
   }
-  else
-  {
-    var descendants = document.querySelectorAll('.ancestor' + id);
+}
 
-    for (var i = 0; i < descendants.length; i++)
+var getChildren = function(node)
+{
+  return node.children && node.children.length > 0 ? node.children : null;
+};
+
+function toggle(nodeID)
+{
+  var node = findNodeInTree(nodeID);
+  
+  if(node.children && node.children.length > 0)
+  {
+    visitDescendants(node, getChildren, function(n)                           //remove descendant node rows from the DOM
     {
-      descendants[i].style.display = 'none';
+      $('#datarowid' + n.id).remove();
+      $('#rowid' + n.id).remove();
+    });
+    
+    node._children = node.children;                                           //hide the descendants in the model
+    node.children = null;
+    
+    $('#icon' + node.id).attr('class', 'glyphicon glyphicon-chevron-right');  //update the expand/collpase icon for this row      
+  }
+  else if(node._children && node._children.length > 0)
+  {
+    node.children = node._children;                                           //unhide the descendants in the model
+    node._children = null;
+    
+    var child;                                                                //add descendant node rows to the DOM
+    for(var i = node.children.length-1; i >= 0; i--)
+    {
+      child = node.children[i];
+      $(addDataRow(child)).insertAfter($('#datarowid' + node.id));
+      $(addRow(child, '', '')).insertAfter($('#rowid' + node.id)); 
     }
 
-    icon.classList.remove('glyphicon-chevron-down');
-    icon.classList.add('glyphicon-chevron-right');
-    row.classList.remove('expanded');
-    row.classList.add('collapsed');
+    $('#icon' + node.id).attr('class', 'glyphicon glyphicon-chevron-down');   //update the expand/collpase icon for this row   
   }
 }
 
@@ -481,7 +409,7 @@ var updateNodeName = function(el)
   var node = findNodeInTree(nodeID);
   
   node.name = el.value;
-  $('#nodeInput' + nodeID).attr('value', node.name);              //update the input value in the DOM, so that when we drag/move the row, the value is correct
+  $('#nodeInput' + nodeID).attr('value', node.name);                          //update the input value in the DOM, so that when we drag/move the row, the value is correct
 };
 
 function updateFieldValue(field, id)

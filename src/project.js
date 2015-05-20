@@ -1,5 +1,7 @@
 function displaySpreadSheet()
 {
+  Project.cleanseTree();
+  
   $('body').append(generateSpreadSheetMarkup());
   
   $('#project-action-container').html(generateProjectSelectorMarkup());
