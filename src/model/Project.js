@@ -41,6 +41,10 @@ Project.cleanseTree = function()
 {
   visit(tree, getChildren, function(node)
   {
+    if(!node.children)
+    {
+      node.children = [];
+    }
     delete node.parent;
   });
 };

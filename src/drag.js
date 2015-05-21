@@ -13,15 +13,10 @@ redips.init = function ()
   rd.event.rowDropped = function (newParentRow)
   {
     var movedID       = parseInt(rd.objOld.id.replace('rowid', ''));
-    var movedRow      = document.getElementById(rd.objOld.id);
     var newParentID   = parseInt(newParentRow.id.replace('rowid', ''));
-    var oldParentID   = getParentID(movedRow);
+    var oldParentID   = findParentInTree(movedID).id;
 
-    moveAssembly(movedID, newParentID, oldParentID, newParentRow);  //move the node in the data, including all descendant nodes
-
-    //show the expand button for the new parent, in case it was previously childless
-    document.getElementById('expandID' + newParentID).classList.remove('hide-expand');
-    document.getElementById('expandID' + newParentID).classList.add('show-expand');
+    moveAssembly(movedID, newParentID, oldParentID);             //move the node in the data, including all descendant nodes
   };
 
   rd.event.rowDroppedSource = function ()         // row was dropped to the source - event handler, mini table (cloned row) will be deleted and source row should return to original state

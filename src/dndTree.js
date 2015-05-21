@@ -251,7 +251,7 @@ function displayTreeView(treeData)
       if (d.children) {
           d._children = d.children;
           d._children.forEach(collapse);
-          d.children = null;
+          d.children = [];
       }
   }
 
@@ -259,7 +259,7 @@ function displayTreeView(treeData)
       if (d._children) {
           d.children = d._children;
           d.children.forEach(expand);
-          d._children = null;
+          d._children = [];
       }
   }
 
@@ -320,10 +320,10 @@ function displayTreeView(treeData)
   function toggleChildren(d) {
       if (d.children) {
           d._children = d.children;
-          d.children = null;
+          d.children = [];
       } else if (d._children) {
           d.children = d._children;
-          d._children = null;
+          d._children = [];
       }
       return d;
   }

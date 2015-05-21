@@ -1,4 +1,4 @@
-var DEFAULT_NODE_INPUT_WIDTH = 400;
+var DEFAULT_NODE_INPUT_WIDTH = 390;
 
 function generateSpreadSheetMarkup()
 {
@@ -71,11 +71,11 @@ function addRow(node)       //add node and data input for each field
   var depthAdjustment = (node.depth-1) * 10;
 
   var dragHandle = '<div class="redips-drag pull-right"><i class="glyphicon glyphicon-move"></i></div>';
-  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs delete-button" onclick="deleteNode(this)"><i class="glyphicon glyphicon-remove"></i></a>';
-  var copyButton = '<a href="#"  class="pull-right btn btn-info btn-xs copy-button" onclick="copyNode(this)"><i class="glyphicon glyphicon-plus"></i></a>';
-  var expandButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggle(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-right"></span></a>';
-  var collapseButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggle(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-down"></span></a>';
-  var blankButton = '<a href="#" style="margin-left:' + (depthAdjustment+12) + 'px"></a>';
+  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs delete-button" onclick="deleteNode(' + node.id + ')"><i class="glyphicon glyphicon-remove"></i></a>';
+  var copyButton = '<a href="#"  class="pull-right btn btn-info btn-xs copy-button" onclick="copyNode(' + node.id + ')"><i class="glyphicon glyphicon-plus"></i></a>';
+  var expandButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-right"></span></a>';
+  var collapseButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-down"></span></a>';
+  var blankButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '"></span></a>';
 
   markup += '<tr id="rowid' + node.id + '" class="nodeRow"><td class="redips-rowhandler cell"><div class="node-container">';
   markup += deleteButton + copyButton + dragHandle;
@@ -176,13 +176,6 @@ function getFieldHeaderMarkup(fieldName, index)
 function getFieldCellMarkup(fieldName, nodeID, value)
 {  
   return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + value + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')" onfocus="displayRawValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></td>';
-}
-
-function getAssemblyMarkup(nodeID, newNodeID, depth)
-{
-  var node    = findNodeInTree(nodeID);
-  var parent  = findParentInTree(nodeID);
-  return addRow(node, depth, parent.id);
 }
 
 function getFieldMenuMarkup(fieldName, x, y)
