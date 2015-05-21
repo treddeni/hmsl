@@ -23,6 +23,8 @@ Field.formatValue = function(field, value)
 {
   if(field.datatype === Field.NUMBER)
   {
+    value = Number(value);      //TODO: handle case where value doesn't parse to a number
+    
     if(field.format === Field.NUMBER_FORMAT)
     {
       return value.toFixed(field.precision);
@@ -33,7 +35,7 @@ Field.formatValue = function(field, value)
     }
     else if(field.format === Field.SCIENTIFIC_FORMAT)
     {
-      return Number(value).toExponential(field.precision);
+      return value.toExponential(field.precision);
     }
   }
   else if(field.datatype === Field.STRING)

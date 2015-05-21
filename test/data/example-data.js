@@ -8,6 +8,7 @@ var smallTree = {
   "version": 1,
   "nextNodeID": 5,
   "depth": 0,
+  "id": 0,
   "fields": [ {"name": "A","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
               {"name": "B","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
               {"name": "C","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},

@@ -1,5 +1,7 @@
 var resizeColumnLeft = 0;
 var resizeField = '0';
+var MIN_COLUMN_WIDTH = 70;
+var GRIPS_WIDTH = 16;
 
 var startResize = function(e, grip)
 {

@@ -1,42 +1,39 @@
-function displaySpreadSheet()
-{
-  Project.cleanseTree();
-  
-  $('body').append(generateSpreadSheetMarkup());
-  
-  $('#project-action-container').html(generateProjectSelectorMarkup());
-  $('#fields-header-row').html(generateFieldsRowMarkup());
-  $('#fields-header-row').css('right', scrollBarWidth + 'px');                                      //shorten the width of the fieldsRow by the width of the scroll bar
-  $("#data-container").html(generateDataMarkup()); 
-	$("#redips-drag").html(generateTreeMarkup());                                                     //append the markup to the DOM
-  $('#redips-drag').css('bottom', scrollBarWidth + 'px');                                           //shorten the height of the tree section by the width of the scroll bar
-	redips.init();                                                                                    //initialize tree drag/drop library
-	initProjectActions();	
-}
+function Project() {}
 
-var handleProjectAction = function()
+Project.projects = null;
+
+Project.getProjects = function() { return Project.projects.projects; };
+Project.setProjects = function(projects) { Project.projects = projects; };
+
+Project.selectProject = function()
 {
-	if($('#projectActionSelector').val() == 'addField')
-	{
-    $('#projectActionInput').val("Type New Field Name and Press Enter to Create");
-		$('#projectActionInput').show().focus().select();
-	}	
+  if($('#projectSelector').find(":selected").attr('id') === "newProjectOption")
+  {
+    $('#editNewProjectNameInput').val("Type New Project Name and Press Enter to Create");
+    $('#editNewProjectNameInput').show().focus().select();
+  }
+  else
+  {
+    //remove the select project option, once the user selects a project
+    if($('#projectSelector').val() > 0)                               
+    {
+      $('#selectProjectOption').remove(); 
+    }
+
+    $.ajax({ type: 'GET', url: 'api/tree?projectID=' + $('#projectSelector').val() }).done(function(data)               //read tree for the selected project from the database
+    {
+      Tree.setTree(data);
+      Project.showSpreadSheetView();
+    });  
+  }                                                                                                 
 };
 
-function projectActionEnterPressed()
+Project.saveToDatabase = function()
 {
-	if($('#projectActionSelector').val() == 'addField')
-	{
-		var fieldName = $('#projectActionInput').val();
-		tree.fields.push(new Field(fieldName));                                                               //add new field to the model
-    addColumn(fieldName);                                                                                 //add column for new field to the view
-		
-    $('#projectActionInput').hide();
-    $('#projectActionSelector').val('blank');
-	}	
-}
+  $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: { json: JSON.stringify(Tree.getTree()) } });
+};
 
-function createNewProject()
+Project.createNewProject = function()
 {
 	$('#selectProjectOption').remove();                                                                     //remove the select project option, once the user selects a project 
 	
@@ -44,27 +41,57 @@ function createNewProject()
 	$('#editNewProjectNameInput').hide();
 	
 	//add an option for the new project to the projects list, select that option
-	var newProjectID = projects.nextProjectID.toString();                                                   //TODO: need to get this from the database to insure we get the correct id
+	var newProjectID = Project.projects.nextProjectID++;                                                   //TODO: need to get this from the database to insure we get the correct id
 	var option = document.createElement("option");
 	option.text = newProjectName;
-	option.value = newProjectID;                                        
+	option.value = newProjectID.toString();                                        
 	$(option).insertBefore('#projectSelector option:nth-child(' + $('#projectSelector').length + ')');
 	$('#projectSelector').val(newProjectID);
 	
 	$.ajax({ type: 'POST', url: '/api/addProject?projectName=' + newProjectName });                         // add the new project to the projects document in the database
 	
 	//create a top node and tree for the project
-	tree = { "projectID": newProjectID, "projectName": newProjectName, "name": newProjectName, "version": 1, "nextNodeID": 2, "fields": [], "children": [{ "id": 1, "name": newProjectName, "children": [] }] };
-  displaySpreadSheet();
+	Tree.setTree({ "projectID": newProjectID, "projectName": newProjectName, "name": newProjectName, "version": 1, "nextNodeID": 2, "depth": 0, "fields": [], "children": [{ "id": 1, "name": newProjectName, "depth": 1, "children": [] }] });
 	
-	Project.saveToDatabase();	
+	Project.saveToDatabase();
+  Project.showSpreadSheetView();	
 }
 
-function showMenu(e, fieldName)
+Project.cleanseTree = function()
 {
-  if($('#fieldMenu').length === 0)
+  Tree.traverse(Tree.getChildren, function(node)
   {
-    $(getFieldMenuMarkup(fieldName, e.clientX, e.clientY)).appendTo('body');
-    $('#fieldMenu').mouseleave(function() { $('#fieldMenu').remove(); });
+    if(!node.children) { node.children = []; }
+    delete node.parent;
+  });
+};
+
+Project.switchView = function()
+{
+  if($('#spreadSheetView').length)
+  {
+    Project.showTreeView();
   }
-}
+  else
+  {
+    Project.showSpreadSheetView();
+  }
+};
+
+Project.showSpreadSheetView = function()
+{
+  Project.removeAllViews();
+  SpreadSheetView.display();  
+};
+
+Project.showTreeView = function()
+{
+  Project.removeAllViews();
+  TreeView.display(Tree.getTree()); 
+};
+
+Project.removeAllViews = function()
+{
+  $('#spreadSheetView').remove();
+  $('#tree-container').remove();  
+};

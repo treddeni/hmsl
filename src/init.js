@@ -2,38 +2,25 @@ var scrollBarWidth;
 
 $(document).ready(function()
 {
-  scrollBarWidth = getScrollBarWidth();
+  scrollBarWidth = getScrollBarWidth();                             //get the scrollbar width for the browser, to use later for sizing other elements
   
   document.onkeydown = checkKey; 
   
-  $.ajax({ type: 'GET', url: 'api/projects'}).done(function(data)                                               //read projects from the server
+  $.ajax({ type: 'GET', url: 'api/projects'}).done(function(data)   //read projects from the server
   { 
-    projects = data; 
-    
-    //TODO: read fields from the database (put them in the tree?)
+    Project.setProjects(data);
   
-    $('#header').html(generateHeaderMarkup(projects.projects));
+    $('#header').html(generateHeaderMarkup(Project.getProjects()));
     
     $('#editNewProjectNameInput').keyup(function(e)
     {
       if(e.keyCode == ENTER_KEY)
       {
-        createNewProject();
+        Project.createNewProject();
       }
     });
   });
 });
-
-function initProjectActions()
-{
-  $('#projectActionInput').keyup(function(e)
-  {
-    if(e.keyCode == ENTER_KEY)
-    {
-      projectActionEnterPressed();
-    }
-  }); 
-}
 
 var getScrollBarWidth = function() 
 {

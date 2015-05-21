@@ -6,16 +6,16 @@ function generateSpreadSheetMarkup()
           '<div id="project-action-container"></div>' +
           '<div id="fields-header-row"></div>' +
           '<div id="redips-drag"></div>' +
-          '<div id="data-container" onscroll="handleDataScroll()"></div>' +
+          '<div id="data-container" onscroll="SpreadSheetView.handleDataScroll()"></div>' +
          '</div>';
 }
 
 function generateHeaderMarkup(projects)
 {
-  var markup = '<select id="projectSelector" class="form-control" onchange="selectProject()">'
+  var markup = '<select id="projectSelector" class="form-control" onchange="Project.selectProject()">'
   + '<option id="selectProjectOption" value="0">Select Project...</option>';
 
-  for(var i = 0; i < projects.length; i++)
+  for(var i in projects)
   {
     markup += '<option value="' + projects[i].id + '">' + projects[i].name + '</option>';
   }
@@ -32,33 +32,34 @@ function generateHeaderMarkup(projects)
 function generateProjectSelectorMarkup()
 {
   return '<table><tr id="headerRow"><tr><div id="project-select-container">'
-  + '<select id="projectActionSelector" class="form-control" onchange="handleProjectAction()"><option value="blank"></option>'
+  + '<select id="projectActionSelector" class="form-control" onchange="ProjectAction.handle()"><option value="blank"></option>'
   + '<option value="addField">Add Field</option>'
   + '</select>'
   + '<input id="projectActionInput" class="form-control"></input>'
   + '</div></tr><table>'; 
 }
 
-function generateFieldsRowMarkup()
+function generateFieldsRowMarkup(fields)
 {  
   var markup = '<table id="fieldHeaderTable"><tr id="fieldHeaderRow">';
 
-  for(var i = 0; i < tree.fields.length; i++)              //add table headers with the field names
+  for(var i in fields)              //add table headers with the field names
   {
-    markup += getFieldHeaderMarkup(tree.fields[i].name, i);
+    markup += getFieldHeaderMarkup(fields[i].name, i);
   }
 
   markup += '</tr></table>';
   return markup;  
 }
 
-function generateTreeMarkup()
+function generateTreeMarkup(tree)
 {
   var markup = '<table id="treeTable">';
 
-  for(var i = 0; i < tree.children.length; i++)        //add row for each node
+  //TODO: need to iterate backwards through the children to preserve order
+  for(var i in tree.children)        //add row for each node
   {
-    markup += addRow(tree.children[i], 0, '', 0);
+    markup += addRow(tree.children[i]);
   }
 
   markup += '</table>';
@@ -71,11 +72,11 @@ function addRow(node)       //add node and data input for each field
   var depthAdjustment = (node.depth-1) * 10;
 
   var dragHandle = '<div class="redips-drag pull-right"><i class="glyphicon glyphicon-move"></i></div>';
-  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs delete-button" onclick="deleteNode(' + node.id + ')"><i class="glyphicon glyphicon-remove"></i></a>';
-  var copyButton = '<a href="#"  class="pull-right btn btn-info btn-xs copy-button" onclick="copyNode(' + node.id + ')"><i class="glyphicon glyphicon-plus"></i></a>';
-  var expandButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-right"></span></a>';
-  var collapseButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-down"></span></a>';
-  var blankButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '"></span></a>';
+  var deleteButton = '<a href="#" class="pull-right btn btn-danger btn-xs delete-button" onclick="SpreadSheetView.deleteNode(' + node.id + ')"><i class="glyphicon glyphicon-remove"></i></a>';
+  var copyButton = '<a href="#"  class="pull-right btn btn-info btn-xs copy-button" onclick="SpreadSheetView.copyNode(' + node.id + ')"><i class="glyphicon glyphicon-plus"></i></a>';
+  var expandButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="SpreadSheetView.toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-right"></span></a>';
+  var collapseButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="SpreadSheetView.toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '" class="glyphicon glyphicon-chevron-down"></span></a>';
+  var blankButton = '<a id="expandID' + node.id + '" href="#" style="margin-left:' + depthAdjustment + 'px" onclick="SpreadSheetView.toggleExpandIcon(' + node.id + ')" class="btn btn-xs"><span id="icon' + node.id + '"></span></a>';
 
   markup += '<tr id="rowid' + node.id + '" class="nodeRow"><td class="redips-rowhandler cell"><div class="node-container">';
   markup += deleteButton + copyButton + dragHandle;
@@ -94,7 +95,7 @@ function addRow(node)       //add node and data input for each field
     depthAdjustment -= 10;
   }
 
-  markup += '<input id="nodeInput' + node.id + '" class="nodeTextInput" type="text" value="' + node.name + '" style="width:' + (DEFAULT_NODE_INPUT_WIDTH-depthAdjustment) + 'px" oninput="updateNodeName(this)"/></div></td></tr>';
+  markup += '<input id="nodeInput' + node.id + '" class="nodeTextInput" type="text" value="' + node.name + '" style="width:' + (DEFAULT_NODE_INPUT_WIDTH-depthAdjustment) + 'px" oninput="SpreadSheetView.updateNodeName(' + node.id + ')"/></div></td></tr>';
 
   if(node.children && node.children.length > 0)                                       //add the children of this node below this node's row
   {
@@ -107,26 +108,27 @@ function addRow(node)       //add node and data input for each field
   return markup;
 }
 
-function generateDataMarkup()
+function generateDataMarkup(tree)
 {
   var markup = '<table id="dataTable">';
 
-  for(var i = 0; i < tree.children.length; i++)        //add row for each node
+  //TODO: need to iterate backwards through the children to preserve order
+  for(var i in tree.children)        //add row for each node
   {
-    markup += addDataRow(tree.children[i]);
+    markup += addDataRow(tree.children[i], tree.fields);
   }
 
   markup += '</table>';
   return markup;  
 }
 
-function addDataRow(node)
+function addDataRow(node, fields)
 {
   var markup = '<tr id="datarowid' + node.id + '" class="dataRow">';
   
-  for(var i = 0; i < tree.fields.length; i++)                                        //add the data inputs for each fields
+  for(var i in fields)                                        //add the data inputs for each field
   {
-    var field = tree.fields[i];
+    var field = fields[i];
 
     var value = '';
     if(node.values && node.values[field.name])
@@ -139,20 +141,18 @@ function addDataRow(node)
   
   markup += '</tr>';
   
-  if(node.children && node.children.length > 0)                                       //add the children of this node below this node's row
+  //add the children of this node below this node's row
+  for(var i in node.children)
   {
-    for(var i = 0; i < node.children.length; i++)
-    {
-      markup += addDataRow(node.children[i]);
-    }
-  }  
+    markup += addDataRow(node.children[i], fields);
+  }
   
   return markup;  
 }
 
-function addColumn(fieldName)
+function addColumn(fieldName, fields)
 {
-  $('#fieldHeaderRow').append(getFieldHeaderMarkup(fieldName, tree.fields.length));    //add field header
+  $('#fieldHeaderRow').append(getFieldHeaderMarkup(fieldName, fields.length));    //add field header
   
   $('.dataRow').each(function(i, item)                                                 //add cell for each node
   {
@@ -166,21 +166,20 @@ function getFieldHeaderMarkup(fieldName, index)
   + '<div class="moveColGrip"></div>'
   + '<div class="fieldNameInputContainer"><textarea id="colHeaderInput' + fieldName + '" class="fieldNameInput">' + fieldName + '</textarea></div>'
   + '<div class="fieldHeaderButton">'
-  + '<img src="images/down-arrow.png" onclick="showMenu(event, \'' + fieldName + '\');" style="cursor:pointer"/>'
+  + '<img src="images/down-arrow.png" onclick="SpreadSheetView.showFieldMenu(event, \'' + fieldName + '\');" style="cursor:pointer"/>'
   + '</div>'
   + '<div id="grip' + index + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div>'
   + '</div></td>';
-  //return '<th id="colHeader' + fieldName + '" class="header"><div class="moveColGrip"></div><input id="colHeaderInput' + fieldName + '" class="fieldNameInput" type="text" value="' + fieldName + '"/><div id="grip' + index + '" class="resizeColGrip" onmousedown="startResize(event, this)"></div></th>';
 }
 
 function getFieldCellMarkup(fieldName, nodeID, value)
 {  
-  return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + value + '" oninput="updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')" onfocus="displayRawValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></td>';
+  return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + value + '" oninput="SpreadSheetView.updateFieldValue(\'' + fieldName + '\', \'' + nodeID + '\')" onfocus="SpreadSheetView.displayRawValue(\'' + fieldName + '\', \'' + nodeID + '\')"/></td>';
 }
 
-function getFieldMenuMarkup(fieldName, x, y)
+function getFieldMenuMarkup(fieldName, x, y, fields)
 {
-  var field = Project.getField(fieldName);
+  var field = Tree.getField(fieldName);
   
   var menu = new Menu();
 
@@ -224,9 +223,9 @@ function getFieldMenuMarkup(fieldName, x, y)
   
   var sumAnyAggItem = new MenuItem('Sum any defined children', Field.SUM_ANY_AGGREGATION, 'agg_type', field);
   
-  for(var i = 0; i < tree.fields.length; i++)
+  for(var index in fields)
   {
-    var f = tree.fields[i];
+    var f = fields[index];
     
     if(f.name != field.name)
     {

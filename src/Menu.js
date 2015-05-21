@@ -13,10 +13,10 @@ Menu.handleClick = function(id)
 
   if(clicked.field)                                                                                       //if the menu item doesn't have a field then ignore it
   {
-    var field = Project.getField(clicked.field.name);
-    field[clicked.varName] = clicked.value;                                                              //set value for the field in the model based on the clicked menu item
+    var field = Tree.getField(clicked.field.name);
+    field[clicked.varName] = clicked.value;                                                               //set value for the field in the model based on the clicked menu item
   
-    for(var i = 0; i < parent.items.length; i++)                                                          //clear the checkmarks for all item on the same menu level
+    for(var i in parent.items)                                                                            //clear the checkmarks for all item on the same menu level
     {
       $('#menuItem' + parent.items[i].id).removeClass('checkedMenuItem').addClass('uncheckedMenuItem');
     }
@@ -25,7 +25,7 @@ Menu.handleClick = function(id)
     
     if(parent === Menu.menu)                                                                              //if this is a top level menu item then update the formatting, since we only want to do this once per click
     {
-      Project.updateFieldFormatting(field);
+      SpreadSheetView.updateFieldFormatting(field);
     }
   }
 };

@@ -1,5 +1,6 @@
-// Get JSON data
-function displayTreeView(treeData)
+function TreeView() {}
+
+TreeView.display = function(treeData)
 {
   $('body').append('<div id="tree-container"></div>');
 
