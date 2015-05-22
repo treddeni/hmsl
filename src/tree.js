@@ -19,12 +19,6 @@ Tree.getField = function(name)
   }
 }
 
-Tree.moveNode = function(movedNode, newParentNode)
-{
-  Tree.removeNode(movedNode);
-  Tree.addNode(movedNode, newParentNode);  
-};
-
 Tree.removeNode = function(node)
 {
   var parentNode = Tree.findParent(node.id);

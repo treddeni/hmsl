@@ -50,8 +50,8 @@ SpreadSheetView.moveNode = function(nodeID, newParentID)
   var newParentNode = Tree.findNode(newParentID);
   var node = Tree.findNode(nodeID);
 
-  Tree.moveNode(node, newParentNode);
   SpreadSheetView.removeNode(node);
+  Tree.addNode(node, newParentNode);
   SpreadSheetView.addNode(node, newParentNode);
 }
 
@@ -62,7 +62,7 @@ SpreadSheetView.addNode = function(node, parentNode)
   {
     SpreadSheetView.expandNode(parentNode);
   }
-  $('#icon' + parentNode.id).attr('class', 'glyphicon glyphicon-chevron-down');                  //set the expand/collapse icon to expand for the parent, just in case it was previously childless
+  SpreadSheetView.redrawExpandIcon(parentNode);
 
   //add the moved node and its descendants to the new parent in the view
   $(addRow(node)).insertAfter($('#rowid' + parentNode.id)); 
@@ -75,7 +75,7 @@ SpreadSheetView.insertNode = function(node, insertBeforeNode)
 {
   $(addRow(node)).insertBefore($('#rowid' + insertBeforeNode.id));                                //insert the new rows before the source row
   $(addDataRow(node, Tree.getTree().fields)).insertBefore($('#datarowid' + insertBeforeNode.id)); //insert the new rows before the source row
-  SpreadSheetView.enableDragging(node.id);   
+  SpreadSheetView.enableDragging(node);   
 };
 
 SpreadSheetView.removeNode = function(node)     //remove the node and its descendants from the view 
@@ -84,14 +84,11 @@ SpreadSheetView.removeNode = function(node)     //remove the node and its descen
   { 
     $('#rowid' + n.id).remove();
     $('#datarowid' + n.id).remove(); 
-  }, node);
+  }, node);  
   
-  //if the parent is childless now, then hide the old parent's expand/collapse icon
   var parentNode = Tree.findParent(node.id);
-  if(parentNode && Tree.isNodeChildless(parentNode))
-  {
-    $('#icon' + parentNode.id).attr('class', ''); 
-  }    
+  Tree.removeNode(node); 
+  SpreadSheetView.redrawExpandIcon(parentNode); //if the parent is childless now, then hide the old parent's expand/collapse icon  
 };
 
 SpreadSheetView.enableDragging = function(node)
@@ -128,8 +125,7 @@ SpreadSheetView.expandNode = function(node)
     $(addRow(child, '', '')).insertAfter($('#rowid' + node.id)); 
   }
 
-  $('#icon' + node.id).attr('class', 'glyphicon glyphicon-chevron-down');   //update the expand/collpase icon for this row
-  
+  SpreadSheetView.redrawExpandIcon(node);
   SpreadSheetView.enableDragging(node);   
 };
 
@@ -141,9 +137,8 @@ SpreadSheetView.collapseNode = function(node)
     $('#rowid' + n.id).remove();
   }, node);
   
-  $('#icon' + node.id).attr('class', 'glyphicon glyphicon-chevron-right');  //update the expand/collpase icon for this row  
-  
-  Tree.collapseNode(node); 
+  Tree.collapseNode(node);
+  SpreadSheetView.redrawExpandIcon(node); 
 };
 
 SpreadSheetView.updateFieldFormatting = function(field)                 //formats all the values for the field (the entire column)
@@ -171,9 +166,7 @@ SpreadSheetView.copyNode = function(nodeID)
 
 SpreadSheetView.deleteNode = function(nodeID)
 {
-  var node = Tree.findNode(nodeID);
-  SpreadSheetView.removeNode(node);
-  Tree.removeNode(node);
+  SpreadSheetView.removeNode(Tree.findNode(nodeID));
 };
 
 SpreadSheetView.updateNodeName = function(nodeID)
@@ -193,4 +186,11 @@ SpreadSheetView.updateFieldValue = function(field, nodeID)
   {
     aggregate_any(Tree.getTree().children[i], field);
   }
+};
+
+SpreadSheetView.redrawExpandIcon = function(node)
+{
+  $('#icon' + node.id).remove();
+  $('#nodeInput' + node.id).remove();
+  $(getNodeContentMarkup(node)).insertAfter($('#nodeContent' + node.id));
 };
