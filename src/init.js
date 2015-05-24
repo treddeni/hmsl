@@ -3,23 +3,8 @@ var scrollBarWidth;
 $(document).ready(function()
 {
   scrollBarWidth = getScrollBarWidth();                             //get the scrollbar width for the browser, to use later for sizing other elements
-  
   document.onkeydown = checkKey; 
-  
-  $.ajax({ type: 'GET', url: 'api/projects'}).done(function(data)   //read projects from the server
-  { 
-    Project.setProjects(data);
-  
-    $('#header').html(generateHeaderMarkup(Project.getProjects()));
-    
-    $('#editNewProjectNameInput').keyup(function(e)
-    {
-      if(e.keyCode == ENTER_KEY)
-      {
-        Project.createNewProject();
-      }
-    });
-  });
+  hms.init();
 });
 
 var getScrollBarWidth = function() 

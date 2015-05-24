@@ -39,16 +39,16 @@ Tree.addNode = function(node, parentNode)
   Tree.setDepths(parentNode);         //set the new depth values for the moved nodes    
 };
 
-Tree.insertNode = function(node, addAfterNode)
+Tree.insertNode = function(node, sourceNode)
 {
-  var parentNode = Tree.findParent(node.id);
+  var parentNode = Tree.findParent(sourceNode.id);
   if(parentNode)
   {
-    parentNode.children.splice(parentNode.children.indexOf(addAfterNode), 0, node);                           
+    parentNode.children.splice(parentNode.children.indexOf(sourceNode), 0, node);                           
   }
   else
   {
-    Tree.tree.children.splice(Tree.tree.children.indexOf(addAfterNode), 0, node);
+    Tree.tree.children.splice(Tree.tree.children.indexOf(sourceNode), 0, node);
   }   
 };
 

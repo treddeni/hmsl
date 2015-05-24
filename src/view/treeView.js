@@ -1,3 +1,15 @@
+var treeView = 
+{
+  render: function()
+  {
+    
+  },
+  destroy: function()
+  {
+    $('#tree-container').remove();
+  }
+};
+
 function TreeView() {}
 
 TreeView.display = function(treeData)
