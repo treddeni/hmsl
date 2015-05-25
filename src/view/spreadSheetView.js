@@ -3,6 +3,8 @@ var spreadSheetView =
 {
   render: function()
   {
+    $(document).on("keydown", spreadSheetKeyHandler.checkKey);
+    
     $('body').append(this.spreadSheetMarkup());
   
     projectAction.init();
@@ -12,7 +14,8 @@ var spreadSheetView =
   },
   destroy: function() 
   { 
-    $('#spreadSheetView').remove(); 
+    $('#spreadSheetView').remove();
+    $(document).off("keydown"); 
   },
   spreadSheetMarkup: function()
   {
@@ -50,16 +53,16 @@ var spreadSheetView =
   {
     if($('#fieldMenu').length === 0)
     {
-      $(getFieldMenuMarkup(fieldName, e.clientX, e.clientY, Tree.getTree().fields)).appendTo('body');
+      $(getFieldMenuMarkup(fieldName, e.clientX, e.clientY, spreadSheet.fields())).appendTo('body');
       $('#fieldMenu').mouseleave(function() { $('#fieldMenu').remove(); });
     }    
   },
   renderDataTable: function()
   {    
     $('#data-container').append('<table id="dataTable"></table>');
-    Tree.getTree().children.forEach(function(child) 
+    spreadSheet.tree().children.forEach(function(child) 
     { 
-      spreadSheetView.renderDataRow(child); 
+      $('#dataTable').append(spreadSheetView.dataRowsMarkup(child)); 
     });
     
     $('#data-container').scroll(function() 
@@ -68,18 +71,21 @@ var spreadSheetView =
       $('#fields-header-row').scrollLeft($('#data-container').scrollLeft());      
     });     
   },
-  renderDataRow: function(node, parentRow)
+  dataRowsMarkup: function(node)
   {
-    if(parentRow) { $('<tr id="datarowid' + node.id + '" class="dataRow"></tr>').insertAfter(parentRow); }
-    else { $('#dataTable').append('<tr id="datarowid' + node.id + '" class="dataRow"></tr>'); }
+    var markup = '<tr id="datarowid' + node.id + '" class="dataRow">';
     
-    Tree.getFields().forEach(function(field) 
+    spreadSheet.fields().forEach(function(field) 
     {  
-      spreadSheetView.renderDataCell($('#datarowid' + node.id), field.name, node.id, spreadSheet.formattedValue(field, node));    
+      markup += '<td class="cell">'
+             + '<input class="fieldInput fieldInput' + field.name + '" type="text" id="' + field.name + node.id + '" value="' + spreadSheet.formattedValue(field, node) + '" '
+             + 'oninput="spreadSheet.updateFieldValue(\'' + field.name + '\',' + node.id + ')" onfocus="$(this).val(spreadSheet.rawValue(\'' + field.name + '\',' + node.id + '))">'
+             + '</td>';
     });
-    
-    if(parentRow) { node.children.forEach(function(child) { spreadSheetView.renderDataRow(child, $('#datarowid' + node.id)); }); }
-    else { node.children.forEach(function(child) { spreadSheetView.renderDataRow(child); }); }   
+
+    node.children.forEach(function(child) { markup += spreadSheetView.dataRowsMarkup(child); });   
+
+    return markup + '</tr>';
   },
   renderDataCell: function(row, fieldName, nodeID, value)
   {
@@ -91,204 +97,117 @@ var spreadSheetView =
   {
     return '<td class="cell"><input class="fieldInput fieldInput' + fieldName + '" type="text" id="' + fieldName + nodeID + '" value="' + value + '"></td>';
   },
-  renderNodeColumn: function()
+  nodeRowMarkup: function(node)
   {
-    $('#redips-drag').html('<table id="treeTable"></table>');
-    Tree.getTree().children.forEach(function(child) { spreadSheetView.renderNodeCell(child); });
-    $('#redips-drag').css('bottom', scrollBarWidth + 'px');                                           //shorten the height of the tree section by the width of the scroll bar
-  	redips.init();                                                                                    //initialize tree drag/drop library    
+    var markup = '<tr id="rowid' + node.id + '" class="nodeRow"><td class="redips-rowhandler cell"><div id="nodeContent' + node.id + '" class="node-container">';
+    
+    markup += spreadSheetView.deleteButton(node.id) + spreadSheetView.copyButton(node.id) + spreadSheetView.dragHandle;
+    markup += spreadSheetView.nodeContent(node);    
+  
+    node.children.forEach(function(child) { markup += spreadSheetView.nodeRowMarkup(child); });
+  
+    return markup + '</div></td></tr>';
   },
-  renderNodeCell: function(node, parentCell)
+  nodeContent: function(node)
   {
-    if(parentCell) { $(spreadSheetView.nodeRow(node.id)).insertAfter(parentCell); }
-    else { $('#treeTable').append(spreadSheetView.nodeRow(node.id)); }
-    
-    $('#nodeContent' + node.id).append(spreadSheetView.deleteButton(node.id) + spreadSheetView.copyButton(node.id) + spreadSheetView.dragHandle);
-    spreadSheetView.addNodeContent(node);
-    $('#nodeInput' + node.id).on('input', function() { SpreadSheetView.updateNodeName(node.id); });
-    
-    if(parentCell) { node.children.forEach(function(child) { spreadSheetView.renderNodeCell(child,  $('#rowid' + node.id)); }); }
-    else { node.children.forEach(function(child) { spreadSheetView.renderNodeCell(child); }); }   
-  },
-  nodeRow: function(nodeID) { return '<tr id="rowid' + nodeID + '" class="nodeRow"><td class="redips-rowhandler cell"><div id="nodeContent' + nodeID + '" class="node-container"></div></td></tr>'; },
-  dragHandle: '<div class="redips-drag pull-right"><i class="glyphicon glyphicon-move"></i></div>',
-  copyButton: function(nodeID) { return '<a href="#"  class="pull-right btn btn-info btn-xs copy-button" onclick="SpreadSheetView.copyNode(' + nodeID + ')"><i class="glyphicon glyphicon-plus"></i></a>' },
-  deleteButton: function(nodeID) { return '<a href="#" class="pull-right btn btn-danger btn-xs delete-button" onclick="SpreadSheetView.deleteNode(' + nodeID + ')"><i class="glyphicon glyphicon-remove"></i></a>' },
-  expandIcon: function(nodeID) { return '<a href="#" id="icon' + nodeID + '" class="btn btn-xs"><span></span></a>'; },
-  nodeInput: function(node) { return '<input id="nodeInput' + node.id + '" class="nodeTextInput" type="text" value="' + node.name + '"/>'; },
-  addNodeContent: function(node)
-  {
-    $('#nodeContent' + node.id).append(spreadSheetView.expandIcon(node.id) + spreadSheetView.nodeInput(node));    
-    
+    var iconMarkup;
     var depthAdjustment = (node.depth-1) * 10;
-    var widthAdjustment = depthAdjustment;
-    
+    var widthAdjustment = depthAdjustment;   
+  
     if(spreadSheet.hasChildren(node))
     {
-      if(spreadSheet.childrenHidden(node))
-      {
-        $('#icon' + node.id).append('<span class="glyphicon glyphicon-chevron-right"></span>');
-      }
-      else
-      {
-        $('#icon' + node.id).append('<span class="glyphicon glyphicon-chevron-down"></span>');
-      }
+      if(spreadSheet.childrenHidden(node)) { iconMarkup = '<span class="glyphicon glyphicon-chevron-right"></span>'; }
+      else                                 { iconMarkup = '<span class="glyphicon glyphicon-chevron-down"></span>'; }
     }
     else
     {
-      $('#icon' + node.id).append('<span></span>');
+      iconMarkup = '<span></span>';
       depthAdjustment += 12;
       widthAdjustment -= 10;
     }
     
-    $('#icon' + node.id).click(function() { spreadSheetView.toggleNodeExpansion(node.id); });
-    $('#icon' + node.id).css('margin-left', depthAdjustment + 'px');
-    $('#nodeInput' + node.id).css('width', (DEFAULT_NODE_INPUT_WIDTH-widthAdjustment) + 'px');
+    return spreadSheetView.expandIcon(node.id, depthAdjustment, iconMarkup) + spreadSheetView.nodeInput(node, DEFAULT_NODE_INPUT_WIDTH-widthAdjustment);     
   },
-  toggleNodeExpansion: function(nodeID)
+  renderNodeColumn: function()
   {
-    var node = Tree.findNode(nodeID);
-    
-    if(Tree.isNodeExpanded(node))
+    $('#redips-drag').html('<table id="treeTable"></table>');
+    spreadSheet.tree().children.forEach(function(child) 
+    { 
+       $('#treeTable').append(spreadSheetView.nodeRowMarkup(child));
+    });
+    $('#redips-drag').css('bottom', scrollBarWidth + 'px');                                           //shorten the height of the tree section by the width of the scroll bar
+  	redips.init();                                                                                    //initialize tree drag/drop library    
+  },
+  dragHandle: '<div class="redips-drag pull-right"><i class="glyphicon glyphicon-move"></i></div>',
+  copyButton: function(nodeID) { return '<a href="#"  class="pull-right btn btn-info btn-xs copy-button" onclick="spreadSheet.copyNode(' + nodeID + ')"><i class="glyphicon glyphicon-plus"></i></a>' },
+  deleteButton: function(nodeID) { return '<a href="#" class="pull-right btn btn-danger btn-xs delete-button" onclick="spreadSheet.deleteNode(' + nodeID + ')"><i class="glyphicon glyphicon-remove"></i></a>' },
+  expandIcon: function(nodeID, depthAdjustment, iconMarkup) 
+  { 
+    return '<a href="#" id="icon' + nodeID + '" class="btn btn-xs" style="margin-left:' + depthAdjustment + 'px" '
+         + 'onclick="spreadSheet.toggleNode(' + nodeID + ')">' + iconMarkup + '</a>'; 
+  },
+  nodeInput: function(node, width)
+  { 
+    return '<input id="nodeInput' + node.id + '" class="nodeTextInput" style="width:' + width + 'px" type="text" '
+         + 'value="' + node.name + '" oninput="spreadSheetView.updateNodeName(' + node.id + ')"/>'; 
+  },
+  expandNode: function(node)
+  {
+    var child;                                                                //add descendant node rows to the DOM
+    for(var i = node.children.length-1; i >= 0; i--)                          //iterate in reverse order to preserve the node ordering
     {
-      Tree.traverseDescendants(Tree.getChildren, function(n)                           //remove descendant node rows from the DOM
-      {
-        $('#datarowid' + n.id).remove();
-        $('#rowid' + n.id).remove();
-      }, node);
-      
-      Tree.collapseNode(node);                 
-    }
-    else if(Tree.isNodeCollapsed(node))
-    {
-      Tree.expandNode(node);
-      
-      var child;                                                                //add descendant node rows to the DOM
-      for(var i = node.children.length-1; i >= 0; i--)                          //iterate in reverse order to preserve the node ordering
-      {
-        child = node.children[i];
-        spreadSheetView.renderDataRow(child, $('#datarowid' + node.id));
-        spreadSheetView.renderNodeCell(child, $('#rowid' + node.id));
-      }     
+      child = node.children[i];
+      $(spreadSheetView.dataRowsMarkup(child)).insertAfter($('#datarowid' + node.id));
+      $(spreadSheetView.nodeRowMarkup(child)).insertAfter($('#rowid' + node.id));
+    }     
 
-      SpreadSheetView.enableDragging(node);   
-    }
-    
-    spreadSheetView.redrawNodeContent(node);     
+    spreadSheetView.enableDragging(node);     
   },
   redrawNodeContent: function(node)
   {
     $('#icon' + node.id).remove();
     $('#nodeInput' + node.id).remove();
-    spreadSheetView.addNodeContent(node);      
+    $('#nodeContent' + node.id).append(spreadSheetView.nodeContent(node));     
   },
   addField: function(fieldName)
   {
-    $('#fieldHeaderRow').append(this.fieldHeaderMarkup(fieldName, Tree.getTree().fields.length));
+    $('#fieldHeaderRow').append(this.fieldHeaderMarkup(fieldName, spreadSheet.fields().length));
     $('#fieldMenuButton' + fieldName).click(function(e) { spreadSheetView.showFieldMenu(e, fieldName); });
     $('.dataRow').each(function(i, item) { spreadSheetView.renderDataCell(item, fieldName, parseInt(item.id.replace('datarowid', '')), ''); });        
-  }
-};
-
-function SpreadSheetView() {}
-
-SpreadSheetView.moveNode = function(nodeID, newParentID)
-{
-  var newParentNode = Tree.findNode(newParentID);
-  var node = Tree.findNode(nodeID);
-
-  SpreadSheetView.removeNode(node);
-  Tree.addNode(node, newParentNode);
-  SpreadSheetView.addNode(node, newParentNode);
-}
-
-SpreadSheetView.addNode = function(node, parentNode)
-{
-  //expand the new parent node, if it's collapsed
-  if(Tree.isNodeCollapsed(parentNode))                                 
+  },
+  updateNodeName: function(nodeID)
   {
-    SpreadSheetView.expandNode(parentNode);
-  }
-  spreadSheetView.redrawNodeContent(parentNode);
-
-  //add the moved node and its descendants to the new parent in the view
-  $(addRow(node)).insertAfter($('#rowid' + parentNode.id)); 
-  $(addDataRow(node, Tree.getTree().fields)).insertAfter($('#datarowid' + parentNode.id));
-  
-  SpreadSheetView.enableDragging(node);     
-};
-
-SpreadSheetView.insertNode = function(node, insertBeforeNode)
-{
-  $(addRow(node)).insertBefore($('#rowid' + insertBeforeNode.id));                                //insert the new rows before the source row
-  $(addDataRow(node, Tree.getTree().fields)).insertBefore($('#datarowid' + insertBeforeNode.id)); //insert the new rows before the source row
-  SpreadSheetView.enableDragging(node);   
-};
-
-SpreadSheetView.removeNode = function(node)     //remove the node and its descendants from the view 
-{
-  Tree.traverse(Tree.getChildren, function(n) 
-  { 
-    $('#rowid' + n.id).remove();
-    $('#datarowid' + n.id).remove(); 
-  }, node);  
-  
-  var parentNode = Tree.findParent(node.id);
-  Tree.removeNode(node);
-  spreadSheetView.redrawNodeContent(parentNode); //if the parent is childless now, then hide the old parent's expand/collapse icon 
-};
-
-SpreadSheetView.enableDragging = function(node)
-{
-  Tree.traverse(Tree.getChildren, function(n)
+    var value = $('#nodeInput' + nodeID).val();
+    spreadSheet.updateNodeName(nodeID, value);
+    $('#nodeInput' + nodeID).attr('value', value);                          //update the input value in the DOM, so that when we drag/move the row, the value is correct    
+  },
+  removeNode: function(node)
   {
-    REDIPS.drag.enableDivs('init', $('#rowid' + n.id).find('div'));    
-  }, node);  
-};
-
-SpreadSheetView.updateFieldFormatting = function(field)                 //formats all the values for the field (the entire column)
-{
-  $('.fieldInput' + field.name).each(function(index) 
+    $('#rowid' + node.id).remove();
+    $('#datarowid' + node.id).remove();     
+  },
+  insertNodeBefore: function(node, insertBeforeNode)
   {
-    var nodeID = $(this).attr('id').replace(field.name, '');
-    var node = Tree.findNode(parseInt(nodeID));
-    
-    if(node.values)
-    {
-      var value = Number(node.values[field.name]);              //get the value from the model
-      $(this).val(Field.formatValue(field, value));             //format the value and display it
-    }
-  });
-};
-
-SpreadSheetView.copyNode = function(nodeID)
-{
-  var sourceNode = Tree.findNode(nodeID);
-  var newNode = Tree.cloneNode(sourceNode);
-  Tree.insertNode(newNode, sourceNode);
-  SpreadSheetView.insertNode(newNode, sourceNode);
-};
-
-SpreadSheetView.deleteNode = function(nodeID)
-{
-  SpreadSheetView.removeNode(Tree.findNode(nodeID));
-};
-
-SpreadSheetView.updateNodeName = function(nodeID)
-{
-  var node = Tree.findNode(nodeID);
-  
-  node.name = $('#nodeInput' + nodeID).val();
-  $('#nodeInput' + nodeID).attr('value', $('#nodeInput' + nodeID).val());                          //update the input value in the DOM, so that when we drag/move the row, the value is correct
-};
-
-SpreadSheetView.updateFieldValue = function(field, nodeID)
-{
-  Tree.updateNodeValue(parseInt(nodeID), field, $('#' + field + nodeID).val());
-
-  //TODO: should perform the aggregation based on the field settings for aggregating
-  for(var i in Tree.getTree().children)
+    $(spreadSheetView.nodeRowMarkup(node)).insertBefore($('#rowid' + insertBeforeNode.id));      //insert the new rows before the source row
+    $(spreadSheetView.dataRowsMarkup(node)).insertBefore($('#datarowid' + insertBeforeNode.id)); //insert the new rows before the source row
+    spreadSheetView.enableDragging(node);    
+  },
+  insertNodeAfter: function(node, insertAfterNode)
   {
-    aggregate_any(Tree.getTree().children[i], field);
+    $(spreadSheetView.nodeRowMarkup(node)).insertAfter($('#rowid' + insertAfterNode.id));      //insert the new rows before the source row
+    $(spreadSheetView.dataRowsMarkup(node)).insertAfter($('#datarowid' + insertAfterNode.id)); //insert the new rows before the source row
+    spreadSheetView.enableDragging(node);    
+  },
+  enableDragging: function(node)
+  {
+    REDIPS.drag.enableDivs('init', $('#rowid' + node.id).find('div'));       
+  },
+  getFieldValue: function(fieldName, nodeID)
+  {
+    return $('#' + fieldName + nodeID).val();
+  },
+  updateFieldValue: function(fieldName, nodeID, value)
+  {
+    $('#' + fieldName + nodeID).val(value);
   }
 };

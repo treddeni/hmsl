@@ -14,7 +14,7 @@ redips.init = function ()
   {
     var movedID       = parseInt(rd.objOld.id.replace('rowid', ''));
     var newParentID   = parseInt(newParentRow.id.replace('rowid', ''));
-    SpreadSheetView.moveNode(movedID, newParentID);
+    spreadSheet.moveNode(movedID, newParentID);
   };
 
   rd.event.rowDroppedSource = function ()         // row was dropped to the source - event handler, mini table (cloned row) will be deleted and source row should return to original state

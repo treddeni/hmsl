@@ -44,7 +44,7 @@ var smallTree = {
           {
             "id": 3,
             "name": "node1.1.1",
-            "depth": 2,
+            "depth": 3,
             "children": []
           }
         ]

@@ -7,5 +7,5 @@ Debug.print = function(o)
 
 Debug.printTree = function()
 {
-  console.log(JSON.stringify(Tree.getTree(), null, '\t'));
+  console.log(JSON.stringify(project.tree, null, '\t'));
 };
