@@ -25,7 +25,7 @@ var project =
     for(var i in this.tree.fields)
     {
       var field = this.tree.fields[i];
-      if(field.name === name)
+      if(field.name === fieldName)
       {
         return field;
       }

@@ -53,8 +53,10 @@ var spreadSheetView =
   {
     if($('#fieldMenu').length === 0)
     {
-      $(getFieldMenuMarkup(fieldName, e.clientX, e.clientY, spreadSheet.fields())).appendTo('body');
-      $('#fieldMenu').mouseleave(function() { $('#fieldMenu').remove(); });
+      //$(getFieldMenuMarkup(fieldName, e.clientX, e.clientY, spreadSheet.fields())).appendTo('body');
+      //getFieldMenuMarkup(fieldName, e.clientX, e.clientY, spreadSheet.fields());
+      fieldMenuController.displayFieldMenu(fieldName, e.clientX, e.clientY);
+      //$('#fieldMenu').mouseleave(function() { $('#fieldMenu').remove(); });
     }    
   },
   renderDataTable: function()
