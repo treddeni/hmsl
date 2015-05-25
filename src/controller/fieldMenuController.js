@@ -4,8 +4,26 @@ var fieldMenuController =
   {
     var field = project.getField(fieldName);
       
-    var menu = new FieldMenu(field, spreadSheet.fields);
+    this.menu = new FieldMenu(field, spreadSheet.fields);
     
-    fieldMenuView.render(menu, x, y);    
+    fieldMenuView.render(this.menu, x, y);    
+  },
+  handleClick: function(menuItemID)
+  {
+    var clicked = this.menu.getMenuItem(menuItemID, this.menu);
+    var parent = this.menu.getMenuItemParent(menuItemID, this.menu);
+  
+    if(clicked.field)                                                                                       //if the menu item doesn't have a field then ignore it
+    {
+      var field = project.getField(clicked.field.name);
+      field[clicked.varName] = clicked.value;                                                               //set value for the field in the model based on the clicked menu item
+    
+      fieldMenuView.setCheckmarks(menuItemID, parent.items);
+
+      if(parent === this.menu)                                                                              //if this is a top level menu item then update the formatting, since we only want to do this once per click
+      {
+        spreadSheet.updateNumberFieldFormatting(field);
+      }
+    }    
   }
 };

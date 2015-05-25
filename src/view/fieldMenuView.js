@@ -9,7 +9,7 @@ var fieldMenuView =
     markup += '</div>';
     
     $('body').append($(markup));
-    //$(markup).appendTo('body');   
+    $('#fieldMenu').mouseleave(function() { $('#fieldMenu').remove(); });  
   },
   renderMenu: function(menu)
   {
@@ -17,7 +17,7 @@ var fieldMenuView =
     
     menu.items.forEach(function(menuItem)
     {
-      markup += '<li onclick="FieldMenu.handleClick(' + menuItem.id + ');">';
+      markup += '<li onclick="fieldMenuController.handleClick(' + menuItem.id + ');">';
   
       var checkMarkClass = 'uncheckedFieldMenuItem';
       if(menuItem.field && menuItem.checked)
@@ -38,5 +38,11 @@ var fieldMenuView =
     });
     
     return markup + '</ul>';    
+  },
+  setCheckmarks: function(menuItemID, siblings)
+  {
+    siblings.forEach(function(sibling) { $('#FieldMenuItem' + sibling.id).removeClass('checkedFieldMenuItem').addClass('uncheckedFieldMenuItem'); });  //clear the checkmarks for all item on the same menu level
+  
+    $('#FieldMenuItem' + menuItemID).removeClass('uncheckedFieldMenuItem').addClass('checkedFieldMenuItem');      
   }
 };
