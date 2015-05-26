@@ -77,14 +77,55 @@ var project =
   },
   expandNode: function(node)
   {
-    node.children = node._children;
-    node._children = [];    
+    if(node._children)
+    {
+      node.children = node._children;
+      node._children = []; 
+    }   
   },
+  fullyExpandNode: function(node)
+  {
+    if(node._children)
+    {
+      node.children = node._children;
+      node.children.forEach(project.fullyExpandNode);
+      node._children = []; 
+    }   
+  },  
   collapseNode: function(node)
   {
-    node._children = node.children;
-    node.children = [];    
+    if(node.children)
+    {
+      node._children = node.children;
+      node.children = [];
+    }    
   },
+  fullyCollapseNode: function(node)
+  {
+    if(node.children)
+    {
+      node._children = node.children;
+      node._children.forEach(project.fullyCollapseNode);
+      node.children = [];
+    }    
+  },
+  toggleExpansion: function(node)
+  {
+    if (node.children) 
+    {
+        node._children = node.children;
+        node.children = [];
+    } 
+    else if (node._children) 
+    {
+        node.children = node._children;
+        node._children = [];
+    }    
+  },
+  hasChildren: function(node)
+  {
+    return (node.children && node.children.length === 0) || (node._children && node._children.length === 0);
+  },  
   isNodeChildless: function(node)
   {
     return (!node.children || node.children.length === 0) && (!node._children || node._children.length === 0);
