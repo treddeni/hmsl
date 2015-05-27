@@ -38,8 +38,6 @@ var treeView =
     expanderSelector.init(project.tree.maxDepth);  
  
     treeView.init();
-  
-    var i = 0;
 
     function zoom() { treeView.svgGroup.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); }   // Define the zoom function for the zoomable tree
   
@@ -120,6 +118,8 @@ var treeView =
   },  
   update: function(source) 
   { 
+    var i = 0;
+        
     // Compute the new height, function counts total children of root node and sets tree height accordingly.
     // This prevents the layout looking squashed when new nodes are made visible or looking sparse when nodes are removed
     // This makes the layout more consistent.
@@ -303,7 +303,7 @@ var treeView =
     scale = treeView.zoomListener.scale();
     x = -source.y0;
     y = -source.x0;
-    x = x * scale + treeView.viewerWidth / 2;
+    x = x * scale + treeView.viewerWidth / 4;
     y = y * scale + treeView.viewerHeight / 2;
     d3.select('g').attr("transform", "translate(" + x + "," + y + ")scale(" + scale + ")");
     treeView.zoomListener.scale(scale);
