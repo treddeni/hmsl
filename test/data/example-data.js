@@ -58,6 +58,130 @@ var smallTree = {
     ]
 }]};
 
+var house = {
+  "_id": "5564839f585cc46c0cc0211c",
+	"projectID": 1,
+	"projectName": "Small Test Project",
+	"name": "Small Test Project",
+	"version": 2,
+	"nextNodeID": 15,
+	"depth": 0,
+  "maxDepth": 4,
+	"id": 1,
+  "fields": [ {"name": "A","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "B","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "C","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "D","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "E","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "F","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "G","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "H","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "I","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null},
+              {"name": "J","datatype": "0","format": "0","precision": 2,"agg_type": "0","agg_qty_field": null}
+  ],
+	"children": [
+		{
+			"id": 1,
+			"name": "Cabin",
+			"depth": 1,
+			"values": {
+				"Weight": 1.2,
+				"Cost": "0.50",
+				"Notes": "some bs"
+			},
+			"children": [
+				{
+					"id": 2,
+					"name": "First Floor",
+					"depth": 2,
+					"values": {
+						"Weight": 1.3,
+						"Notes": "some bs2"
+					},
+					"children": [
+						{
+							"id": 6,
+							"name": "Bathroom",
+							"depth": 3,
+							"children": [
+								{
+									"id": 7,
+									"name": "Sink",
+									"depth": 4,
+									"children": []
+								},
+								{
+									"id": 5,
+									"name": "Toilet",
+									"depth": 4,
+									"children": []
+								}
+							]
+						},
+						{
+							"id": 8,
+							"name": "Kitchen",
+							"depth": 3,
+							"children": [
+								{
+									"id": 9,
+									"name": "Sink",
+									"depth": 4,
+									"children": []
+								},
+								{
+									"id": 10,
+									"name": "Dishwasher",
+									"depth": 4,
+									"children": []
+								},
+								{
+									"id": 3,
+									"name": "Cabinets",
+									"depth": 4,
+									"children": []
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": 11,
+					"name": "Second Floor",
+					"depth": 2,
+					"children": [
+						{
+							"id": 12,
+							"name": "Bedroom",
+							"depth": 3,
+							"children": [
+								{
+									"id": 13,
+									"name": "Carpet",
+									"depth": 4,
+									"children": []
+								},
+								{
+									"id": 14,
+									"name": "Bed",
+									"depth": 4,
+									"children": []
+								},
+								{
+									"id": 4,
+									"name": "Nightstand",
+									"depth": 4,
+									"children": []
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+};
+
 var largeTree = {
   "_id": "55525dd17a68e8501aa22260",
   "projectID": 1,
@@ -21420,4 +21544,5 @@ var largeTree = {
 
 exports.smallTree = smallTree;
 exports.largeTree = largeTree;
+exports.house = house;
 exports.projects = projects;

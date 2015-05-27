@@ -27,7 +27,7 @@ var hms =
     {
       this.view.destroy();
       this.view = treeView;
-      treeView.display();
+      treeView.render();
     }
     else if(this.view === treeView)
     {
@@ -47,6 +47,12 @@ var hms =
   nextProjectID: function()
   {
     return projects.nextProjectID++;
+  },
+  expandToLevel: function(level)
+  {
+    project.expandToLevel(project.tree, level);
+    if(this.view === spreadSheetView) { spreadSheet.display(); }
+    else if(this.view === treeView) { treeView.refresh(); }  
   }
 };
 

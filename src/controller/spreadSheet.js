@@ -95,7 +95,8 @@ var spreadSheet =
     }
     
     spreadSheetView.redrawNodeContent(parentNode);
-    spreadSheetView.insertNodeAfter(node, parentNode);      //add the moved node and its descendants to the new parent in the view  
+    spreadSheetView.insertNodeAfter(node, parentNode);      //add the moved node and its descendants to the new parent in the view
+    spreadSheetView.renderExpander();  
   },
   copyNode: function(nodeID)
   {

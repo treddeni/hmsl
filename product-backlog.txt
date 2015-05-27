@@ -1,15 +1,14 @@
 Incomplete User Stories
 -----------------------
+- Weighted Tree View
+- Choose a previous version of the project to open
+- Name the version of the project being saved
+- Set a reason for change when saving a project
 - Resize a column
 - Edit a field's name
 - Choose how a field should aggregate, by selecting whether a field aggregates or not, and the field used for the quantity in the aggregation
 - Change the order in which the fields are displayed
 - Delete a field from a project
-- Choose a previous version of the project to open
-- Name the version of the project being saved
-- Set a reason for change when saving a project
-- Expand all nodes
-- Expand nodes to a selected structure level/depth
 
 Bugs/Issues
 -----------
@@ -46,6 +45,8 @@ Future User Stories
 
 Completed User Stories
 ----------------------
+- Expand all nodes
+- Expand nodes to a selected structure level/depth
 - Create a project
 - Select/open a project
 - Save current project to the database

@@ -33,12 +33,12 @@ var projectAction =
   },
   markup: function()
   {
-    return '<table><tr id="headerRow"><tr><div id="project-select-container">'
+    return '<div id="project-select-container">'
     + '<select id="projectActionSelector" class="form-control">'
     + '<option value="blank"></option>'
     + '<option value="addField">Add Field</option>'
     + '</select>'
     + '<input id="projectActionInput" class="form-control"></input>'
-    + '</div></tr><table>'; 
+    + '</div>'; 
   }
 };

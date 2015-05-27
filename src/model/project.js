@@ -2,6 +2,7 @@ var project =
 {
   saveToDatabase: function()
   {
+    this.cleanseData();
     $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: { json: JSON.stringify(this.tree) } });
   },
   fields: function()
@@ -14,6 +15,10 @@ var project =
     {
       if(!node.children) { node.children = []; }
       delete node.parent;
+      delete node.x;
+      delete node.x0;
+      delete node.y;
+      delete node.y0;
     });    
   },
   addField: function(fieldName)
@@ -54,6 +59,12 @@ var project =
     node.children.forEach(function(child, i)
     {
       child.depth = node.depth + 1;
+      
+      if(child.depth > project.tree.maxDepth) 
+      { 
+        project.tree.maxDepth = child.depth; 
+      }
+      
       project.setDepths(child);
     });
   },
@@ -77,7 +88,7 @@ var project =
   },
   expandNode: function(node)
   {
-    if(node._children)
+    if(project.isNodeCollapsed(node))
     {
       node.children = node._children;
       node._children = []; 
@@ -85,16 +96,25 @@ var project =
   },
   fullyExpandNode: function(node)
   {
-    if(node._children)
+    project.expandNode(node);
+    node.children.forEach(function(child) { project.fullyExpandNode(child); });       
+  },
+  expandToLevel: function(node, level)
+  {    
+    if(node.depth < level)
     {
-      node.children = node._children;
-      node.children.forEach(project.fullyExpandNode);
-      node._children = []; 
-    }   
-  },  
+      project.expandNode(node);
+      for(var i in node.children) { project.expandToLevel(node.children[i], level); }
+    }
+    else
+    {
+      project.collapseNode(node);
+      for(var i in node._children) { project.expandToLevel(node._children[i], level); }
+    }
+  }, 
   collapseNode: function(node)
   {
-    if(node.children)
+    if(project.isNodeExpanded(node))
     {
       node._children = node.children;
       node.children = [];

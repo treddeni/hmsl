@@ -5,9 +5,11 @@ var spreadSheetView =
   {
     $(document).on("keydown", spreadSheetKeyHandler.checkKey);
     
+    $('#spreadSheetView').remove();
     $('body').append(this.spreadSheetMarkup());
-  
+    
     projectAction.init();
+    this.renderExpander();
     this.renderFieldsRow();
     this.renderDataTable();
     this.renderNodeColumn();
@@ -21,10 +23,15 @@ var spreadSheetView =
   {
     return '<div id="spreadSheetView">' +
       '<div id="project-action-container"></div>' +
+      '<div id="expanderContainer"></div>' +
       '<div id="fields-header-row"></div>' +
       '<div id="redips-drag"></div>' +
       '<div id="data-container"></div>' +
     '</div>';
+  },
+  renderExpander: function()
+  {
+    expanderSelector.init(spreadSheet.tree().maxDepth);
   },
   renderFieldsRow: function()
   {
@@ -170,7 +177,7 @@ var spreadSheetView =
   },
   addField: function(fieldName)
   {
-    $('#fieldHeaderRow').append(this.fieldHeaderMarkup(fieldName, spreadSheet.fields().length));
+    $('#fieldHeaderRow').append(spreadSheetView.fieldHeader(fieldName));
     $('#fieldMenuButton' + fieldName).click(function(e) { spreadSheetView.showFieldMenu(e, fieldName); });
     $('.dataRow').each(function(i, item) { spreadSheetView.renderDataCell(item, fieldName, parseInt(item.id.replace('datarowid', '')), ''); });        
   },

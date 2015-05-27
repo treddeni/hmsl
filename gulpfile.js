@@ -44,27 +44,31 @@ gulp.task('watch', function()
 
 gulp.task('seed_large', function()
 {
-  mongo.connect(database.url, function (err, db) 
-  {
-    db.collection('tree').remove({});
-    db.collection('projects').remove({});
-    db.collection('tree').insert(exampleData.largeTree);
-    db.collection('projects').insert(exampleData.projects);
-  });
+  seed(exampleData.largeTree);
 });
 
 gulp.task('seed_small', function()
+{
+  seed(exampleData.smallTree);
+});
+
+gulp.task('seed_house', function()
+{
+  seed(exampleData.house);
+});
+
+function seed(data)
 {
   mongo.connect(database.url, function (err, db) 
   {
     db.collection('tree').remove({}, function() 
     { 
-      db.collection('tree').insert(exampleData.smallTree); 
+      db.collection('tree').insert(data);
     });
     
     db.collection('projects').remove({}, function() 
     { 
       db.collection('projects').insert(exampleData.projects); 
     });
-  });
-});
+  });  
+}
