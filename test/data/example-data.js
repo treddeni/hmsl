@@ -81,7 +81,7 @@ var house = {
   ],
 	"children": [
 		{
-			"id": 1,
+			"id": 2,
 			"name": "Cabin",
 			"depth": 1,
 			"values": {
@@ -91,7 +91,7 @@ var house = {
 			},
 			"children": [
 				{
-					"id": 2,
+					"id": 3,
 					"name": "First Floor",
 					"depth": 2,
 					"values": {
@@ -100,18 +100,18 @@ var house = {
 					},
 					"children": [
 						{
-							"id": 6,
+							"id": 7,
 							"name": "Bathroom",
 							"depth": 3,
 							"children": [
 								{
-									"id": 7,
+									"id": 8,
 									"name": "Sink",
 									"depth": 4,
 									"children": []
 								},
 								{
-									"id": 5,
+									"id": 6,
 									"name": "Toilet",
 									"depth": 4,
 									"children": []
@@ -119,24 +119,24 @@ var house = {
 							]
 						},
 						{
-							"id": 8,
+							"id": 9,
 							"name": "Kitchen",
 							"depth": 3,
 							"children": [
 								{
-									"id": 9,
+									"id": 10,
 									"name": "Sink",
 									"depth": 4,
 									"children": []
 								},
 								{
-									"id": 10,
+									"id": 11,
 									"name": "Dishwasher",
 									"depth": 4,
 									"children": []
 								},
 								{
-									"id": 3,
+									"id": 4,
 									"name": "Cabinets",
 									"depth": 4,
 									"children": []
@@ -146,29 +146,29 @@ var house = {
 					]
 				},
 				{
-					"id": 11,
+					"id": 12,
 					"name": "Second Floor",
 					"depth": 2,
 					"children": [
 						{
-							"id": 12,
+							"id": 13,
 							"name": "Bedroom",
 							"depth": 3,
 							"children": [
 								{
-									"id": 13,
+									"id": 14,
 									"name": "Carpet",
 									"depth": 4,
 									"children": []
 								},
 								{
-									"id": 14,
+									"id": 15,
 									"name": "Bed",
 									"depth": 4,
 									"children": []
 								},
 								{
-									"id": 4,
+									"id": 5,
 									"name": "Nightstand",
 									"depth": 4,
 									"children": []
