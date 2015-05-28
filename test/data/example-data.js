@@ -64,7 +64,7 @@ var house = {
 	"projectName": "Small Test Project",
 	"name": "Small Test Project",
 	"version": 2,
-	"nextNodeID": 15,
+	"nextNodeID": 16,
 	"depth": 0,
   "maxDepth": 4,
 	"id": 1,

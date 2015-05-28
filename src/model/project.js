@@ -51,7 +51,7 @@ var project =
   },
   addNode: function(node, parentNode)
   {
-    parentNode.children.push(node);         //add the moved node to it's new parent in the model
+    parentNode.children.push(node);            //add the moved node to it's new parent in the model
     project.setDepths(parentNode);             //set the new depth values for the moved nodes       
   },
   setDepths: function(node)

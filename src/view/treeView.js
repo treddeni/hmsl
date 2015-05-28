@@ -114,7 +114,6 @@ var treeView =
     if (d3.event.defaultPrevented) { return; } // click suppressed
     project.toggleExpansion(d);
     treeView.update(d);
-    treeView.centerNode(d);
   },  
   update: function(source) 
   { 
@@ -202,8 +201,7 @@ var treeView =
     nodeUpdate.select("text").style("fill-opacity", 1);
 
     // Transition exiting nodes to the parent's new position.
-    var nodeExit = node.exit().transition()
-        .duration(treeView.duration)
+    var nodeExit = node.exit()
         .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
         .remove();
 
@@ -225,8 +223,7 @@ var treeView =
     link.attr("d", treeView.diagonal);
 
     // Transition exiting nodes to the parent's new position.
-    link.exit().transition()
-        .duration(treeView.duration)
+    link.exit()
         .attr("d", function(d) {
             var o = { x: source.x, y: source.y };
             return treeView.diagonal({ source: o, target: o });
@@ -270,7 +267,7 @@ var treeView =
     if (treeView.draggingNode !== null) 
     {
       treeView.update(treeView.root);
-      treeView.centerNode(treeView.draggingNode);
+      //treeView.centerNode(treeView.draggingNode);
       treeView.draggingNode = null;
     }      
   },
