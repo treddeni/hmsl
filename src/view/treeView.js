@@ -1,3 +1,7 @@
+var MIN_NODE_SIZE = 5;
+var MAX_NODE_SIZE = 100;
+var VERTICAL_TREE_SPACING = 300;
+
 var treeView = 
 {
   destroy: function()
@@ -135,7 +139,7 @@ var treeView =
     };
     
     childCount(0, treeView.root);
-    var newHeight = d3.max(levelWidth) * 25; // 25 pixels per line  
+    var newHeight = d3.max(levelWidth) * VERTICAL_TREE_SPACING; // 25 pixels per line  
     treeView.tree = treeView.tree.size([newHeight, treeView.viewerWidth]);
 
     // Compute the new tree layout.
@@ -144,10 +148,10 @@ var treeView =
 
     // Set widths between levels based on maxLabelLength.
     nodes.forEach(function(d) {
-        d.y = (d.depth * (treeView.maxLabelLength * 10)); //maxLabelLength * 10px
+        //d.y = (d.depth * (treeView.maxLabelLength * 10)); //maxLabelLength * 10px
         // alternatively to keep a fixed scale one can set a fixed depth per level
         // Normalize for fixed-depth by commenting out below line
-        // d.y = (d.depth * 500); //500px per level.
+        d.y = (d.depth * 200); //200px per level.
     });
 
     // Update the nodes…
@@ -306,15 +310,21 @@ var treeView =
     treeView.zoomListener.scale(scale);
     treeView.zoomListener.translate([x, y]);
   },          
-  computeNodeSize: function(node, field)
+  computeNodeSize: function(node)
   {
-    if(node.values && node.values[field] && node.values[field] > 5)
+    var nodeSize = MIN_NODE_SIZE;
+    
+    if(tree.field)
     {
-      return node.values[field];
+      if(node.values && node.values[tree.field.name])
+      {
+        //nodeSize = 2 * Math.PI * Math.sqrt(MAX_NODE_SIZE * node.values[tree.field.name] / tree.maxFieldValue / Math.PI);
+        nodeSize = MAX_NODE_SIZE * Math.sqrt(node.values[tree.field.name] / tree.maxFieldValue);
+      }
+      
+      if(nodeSize < MIN_NODE_SIZE) { nodeSize = MIN_NODE_SIZE; }
     }
-    else
-    {
-      return 5;
-    }        
+    
+    return nodeSize;       
   }   
 };

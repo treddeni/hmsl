@@ -27,7 +27,8 @@ var hms =
     {
       this.view.destroy();
       this.view = treeView;
-      treeView.render();
+      tree.display();
+      //treeView.render(project.fields()[0]);
     }
     else if(this.view === treeView)
     {
