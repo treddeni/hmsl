@@ -1,22 +1,52 @@
-//var MIN_NODE_SIZE = 5;
-//var MAX_NODE_SIZE = 100;
-//var VERTICAL_TREE_SPACING = 300;
+var MIN_NODE_SIZE = 5;
+var MAX_NODE_SIZE = 100;
+
+var VERTICAL_VIEW = 0;
+var HORIZONTAL_VIEW = 1;
 
 var weightedTreeView = 
 {
   destroy: function()
   {
-    $('#tree-container').remove();
+    $('#treeView').remove();
   },
   refresh: function()
   {
     weightedTreeView.update(weightedTreeView.root);
   },
+  rotate: function()
+  {
+    if(weightedTreeView.direction === HORIZONTAL_VIEW)
+    {
+      weightedTreeView.direction = VERTICAL_VIEW;
+      weightedTreeView.horizontal_spacing = 100;
+      weightedTreeView.vertical_spacing = 60;
+      weightedTreeView.diagonal = d3.svg.diagonal().projection(function(d) { return [d.x, d.y]; });  // define a d3 diagonal projection for use by the node paths later on.
+      
+      weightedTreeView.root.y0 = weightedTreeView.viewerHeight / 2;
+      weightedTreeView.root.x0 = 0;      
+    }
+    else
+    {
+      weightedTreeView.direction = HORIZONTAL_VIEW;
+      weightedTreeView.horizontal_spacing = 300;
+      weightedTreeView.vertical_spacing = 200;
+      weightedTreeView.diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; });  // define a d3 diagonal projection for use by the node paths later on.
+      
+      weightedTreeView.root.x0 = weightedTreeView.viewerHeight / 2;
+      weightedTreeView.root.y0 = 0;    
+    }
+    
+    weightedTreeView.update(weightedTreeView.root);
+  },
   init: function()
   {
+    weightedTreeView.direction = HORIZONTAL_VIEW;
     weightedTreeView.selectedNode = null;
     weightedTreeView.draggingNode = null;
-    weightedTreeView.duration = 750;    
+    weightedTreeView.duration = 750;
+    weightedTreeView.horizontal_spacing = 300;
+    weightedTreeView.vertical_spacing = 200;    
     
     weightedTreeView.maxLabelLength = 0;
     
@@ -36,10 +66,12 @@ var weightedTreeView =
   },  
   render: function()
   {
-    $('#weightedTreeView').remove();
-    $('body').append('<div id="weightedTreeView"><div id="expanderContainer"></div><div id="tree-container"></div></div>');
+    weightedTreeView.destroy();
+    $('body').append('<div id="treeView"><div id="treeViewOptions"><div id="expanderContainer"></div></div><div id="tree-container"></div></div>');
  
-    expanderSelector.init(project.tree.maxDepth);  
+    expanderSelector.init(project.tree.maxDepth);
+    $('#treeViewOptions').append('<a href="#" id="treeViewRotateButton" class="btn btn-default pull-right">Rotate View</a>');
+    $('#treeViewRotateButton').click(function() { weightedTreeView.rotate(); });  
  
     weightedTreeView.init();
 
@@ -139,7 +171,7 @@ var weightedTreeView =
     };
     
     childCount(0, weightedTreeView.root);
-    var newHeight = d3.max(levelWidth) * VERTICAL_TREE_SPACING; // 25 pixels per line  
+    var newHeight = d3.max(levelWidth) * weightedTreeView.vertical_spacing; // 25 pixels per line
     weightedTreeView.tree = weightedTreeView.tree.size([newHeight, weightedTreeView.viewerWidth]);
 
     // Compute the new tree layout.
@@ -151,7 +183,7 @@ var weightedTreeView =
         //d.y = (d.depth * (weightedTreeView.maxLabelLength * 10)); //maxLabelLength * 10px
         // alternatively to keep a fixed scale one can set a fixed depth per level
         // Normalize for fixed-depth by commenting out below line
-        d.y = (d.depth * 200); //200px per level.
+        d.y = (d.depth * weightedTreeView.horizontal_spacing); //200px per level.
     });
 
     // Update the nodes…
@@ -199,7 +231,15 @@ var weightedTreeView =
       .style("fill", function(d) { return project.isNodeCollapsed(d) ? "lightsteelblue" : "#fff"; });
 
     // Transition nodes to their new position.
-    var nodeUpdate = node.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+    var nodeUpdate;
+    if(weightedTreeView.direction === VERTICAL_VIEW)
+    {
+      nodeUpdate = node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    }
+    else
+    {
+      nodeUpdate = node.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+    }
 
     // Fade the text in
     nodeUpdate.select("text").style("fill-opacity", 1);

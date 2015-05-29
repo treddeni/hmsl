@@ -1,6 +1,9 @@
 Incomplete User Stories
 -----------------------
-- Weighted Tree View
+- Copy nodes/assemblies on the tree view
+- Circle packing view
+- Partition view
+- Clickable hierarchical pareto chart
 - Choose a previous version of the project to open
 - Name the version of the project being saved
 - Set a reason for change when saving a project
@@ -9,6 +12,7 @@ Incomplete User Stories
 - Choose how a field should aggregate, by selecting whether a field aggregates or not, and the field used for the quantity in the aggregation
 - Change the order in which the fields are displayed
 - Delete a field from a project
+- Enhance the layout of the Weighted Tree View
 
 Bugs/Issues
 -----------

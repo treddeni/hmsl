@@ -4,6 +4,7 @@ var MAX_NODE_SIZE = 100;
 var VERTICAL_VIEW = 0;
 var HORIZONTAL_VIEW = 1;
 
+//TODO: refactor, remove references to project and put them in the tree controller file
 var treeView = 
 {
   destroy: function()

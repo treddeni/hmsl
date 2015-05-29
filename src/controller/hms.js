@@ -15,35 +15,47 @@ var hms =
     projects.openProject(projectID, function(tree)
     {
       project.tree = tree;
-      spreadSheet.display();      
-    });
-    if(this.view) { this.view.destroy(); }
-    this.view = spreadSheetView;       
+      hms.selectView(headerView.selectedView());    
+    });     
   },
   saveToDatabase: function() { project.saveToDatabase(); },
-  switchView: function()
+  selectView: function(viewID)
   {
-    if(this.view === spreadSheetView)
+    if(project.tree)
     {
-      this.view.destroy();
-      this.view = treeView;
-      tree.display();
-      //treeView.render(project.fields()[0]);
+      if(this.view) { this.view.destroy(); }
+      this.showView(viewID);
     }
-    else if(this.view === treeView)
+  },
+  showView: function(viewID)
+  {
+    switch(viewID)
     {
-      this.view.destroy();
-      this.view = spreadSheetView;
-      spreadSheet.display();      
-    }
+      case SPREADSHEET_VIEW:
+        this.view = spreadSheetView;
+        spreadSheet.display();
+        break;
+        
+      case TREE_VIEW:
+        this.view = treeView;
+        tree.displayTree();
+        break;
+        
+      case WEIGHTED_TREE_VIEW:
+        this.view = weightedTreeView;
+        tree.displayWeightedTree();
+        break; 
+        
+      case CIRCLE_VIEW:
+        this.view = circleView;
+        circleView.display();
+        break;                
+    }    
   },
   createNewProject: function(newProjectName)
   {  	
     projects.createNewProject(newProjectName);
-  	
-    this.view.destroy();
-    this.view = spreadSheetView;
-    spreadSheet.display();      
+  	hms.selectView(headerView.selectedView());      
   },
   nextProjectID: function()
   {
@@ -52,8 +64,10 @@ var hms =
   expandToLevel: function(level)
   {
     project.expandToLevel(project.tree, level);
+    //TODO: the following needs to be refactored
     if(this.view === spreadSheetView) { spreadSheet.display(); }
-    else if(this.view === treeView) { treeView.refresh(); }  
+    else if(this.view === treeView) { treeView.refresh(); }
+    else if(this.view === weightedTreeView) { weightedTreeView.refresh(); }   
   }
 };
 

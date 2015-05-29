@@ -33,7 +33,7 @@ var projectAction =
   },
   markup: function()
   {
-    return '<div id="project-select-container">'
+    return '<div id="projectActionSelectorContainer">'
     + '<select id="projectActionSelector" class="form-control">'
     + '<option value="blank"></option>'
     + '<option value="addField">Add Field</option>'

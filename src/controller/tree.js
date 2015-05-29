@@ -1,12 +1,18 @@
 var tree =
 {
-  display: function()
+  displayTree: function()
+  {
+    this.data = project.tree;
+    this.field = project.fields()[0];
+    treeView.render();
+  },
+  displayWeightedTree: function()
   {
     this.data = project.tree;
     this.field = project.fields()[0];
     this.maxFieldValue = this.calcMaxFieldValue();
-    treeView.render();
-  },
+    weightedTreeView.render();
+  },  
   calcMaxFieldValue: function()
   {
     var maxValue = Number.NEGATIVE_INFINITY;
