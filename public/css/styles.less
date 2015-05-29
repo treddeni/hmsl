@@ -23,10 +23,19 @@
   right:    5px;
 }
 
+#spreadSheetViewActions
+{
+  left:     0px;
+  top:      @header-height;
+  right:    @tree-width;
+  width:    @tree-width;
+  position: absolute;  
+}
+
 #project-action-container
 {
   left:     @tree-width / 2;
-  top:      @header-height;
+  top:      0px;
   right:    @tree-width;
   width:    @tree-width / 2;
   position: absolute;
@@ -38,10 +47,18 @@
   height: @fields-header-height;
 }
 
-#expanderContainer
+#treeViewOptions
 {
   left:     0px;
   top:      @header-height;
+  right:    0px;
+  position: absolute;  
+}
+
+#expanderContainer
+{
+  left:     0px;
+  top:      0px;
   right:    @tree-width / 2;
   width:    @tree-width / 2;
   position: absolute;
@@ -370,41 +387,49 @@
 }
 
 
-.node {
+.node 
+{
   cursor: pointer;
 }
 
-.overlay{
-    background-color:#EEE;
+.overlay
+{
+
 }
  
-.node circle {
+.node circle 
+{
   fill: #fff;
   stroke: steelblue;
   stroke-width: 1.5px;
 }
  
-.node text {
+.node text 
+{
   font-size:10px; 
   font-family:sans-serif;
 }
  
-.link {
+.link 
+{
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
 }
 
-.templink {
+.templink 
+{
   fill: none;
   stroke: red;
   stroke-width: 3px;
 }
 
-.ghostCircle.show{
+.ghostCircle.show
+{
     display:block;
 }
 
-.ghostCircle, .activeDrag .ghostCircle{
+.ghostCircle, .activeDrag .ghostCircle
+{
      display: none;
 }

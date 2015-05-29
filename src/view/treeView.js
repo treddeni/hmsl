@@ -1,22 +1,52 @@
 var MIN_NODE_SIZE = 5;
 var MAX_NODE_SIZE = 100;
-var VERTICAL_TREE_SPACING = 300;
+
+var VERTICAL_VIEW = 0;
+var HORIZONTAL_VIEW = 1;
 
 var treeView = 
 {
   destroy: function()
   {
-    $('#tree-container').remove();
+    $('#treeView').remove();
   },
   refresh: function()
   {
     treeView.update(treeView.root);
   },
+  rotate: function()
+  {
+    if(treeView.direction === HORIZONTAL_VIEW)
+    {
+      treeView.direction = VERTICAL_VIEW;
+      treeView.horizontal_spacing = 100;
+      treeView.vertical_spacing = 60;
+      treeView.diagonal = d3.svg.diagonal().projection(function(d) { return [d.x, d.y]; });  // define a d3 diagonal projection for use by the node paths later on.
+      
+      treeView.root.y0 = treeView.viewerHeight / 2;
+      treeView.root.x0 = 0;      
+    }
+    else
+    {
+      treeView.direction = HORIZONTAL_VIEW;
+      treeView.horizontal_spacing = 150;
+      treeView.vertical_spacing = 25;
+      treeView.diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; });  // define a d3 diagonal projection for use by the node paths later on.
+      
+      treeView.root.x0 = treeView.viewerHeight / 2;
+      treeView.root.y0 = 0;    
+    }
+    
+    treeView.update(treeView.root);
+  },
   init: function()
   {
+    treeView.direction = HORIZONTAL_VIEW;
     treeView.selectedNode = null;
     treeView.draggingNode = null;
-    treeView.duration = 750;    
+    treeView.duration = 750;
+    treeView.horizontal_spacing = 150;
+    treeView.vertical_spacing = 25;    
     
     treeView.maxLabelLength = 0;
     
@@ -36,10 +66,12 @@ var treeView =
   },  
   render: function()
   {
-    $('#treeView').remove();
-    $('body').append('<div id="treeView"><div id="expanderContainer"></div><div id="tree-container"></div></div>');
+    treeView.destroy();
+    $('body').append('<div id="treeView"><div id="treeViewOptions"><div id="expanderContainer"></div></div><div id="tree-container"></div></div>');
  
-    expanderSelector.init(project.tree.maxDepth);  
+    expanderSelector.init(project.tree.maxDepth);
+    $('#treeViewOptions').append('<a href="#" id="treeViewRotateButton" class="btn btn-default pull-right">Rotate View</a>');
+    $('#treeViewRotateButton').click(function() { treeView.rotate(); });  
  
     treeView.init();
 
@@ -139,7 +171,7 @@ var treeView =
     };
     
     childCount(0, treeView.root);
-    var newHeight = d3.max(levelWidth) * VERTICAL_TREE_SPACING; // 25 pixels per line  
+    var newHeight = d3.max(levelWidth) * treeView.vertical_spacing; // 25 pixels per line
     treeView.tree = treeView.tree.size([newHeight, treeView.viewerWidth]);
 
     // Compute the new tree layout.
@@ -151,7 +183,7 @@ var treeView =
         //d.y = (d.depth * (treeView.maxLabelLength * 10)); //maxLabelLength * 10px
         // alternatively to keep a fixed scale one can set a fixed depth per level
         // Normalize for fixed-depth by commenting out below line
-        d.y = (d.depth * 200); //200px per level.
+        d.y = (d.depth * treeView.horizontal_spacing); //200px per level.
     });
 
     // Update the nodes…
@@ -199,7 +231,15 @@ var treeView =
       .style("fill", function(d) { return project.isNodeCollapsed(d) ? "lightsteelblue" : "#fff"; });
 
     // Transition nodes to their new position.
-    var nodeUpdate = node.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+    var nodeUpdate;
+    if(treeView.direction === VERTICAL_VIEW)
+    {
+      nodeUpdate = node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+    }
+    else
+    {
+      nodeUpdate = node.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+    }
 
     // Fade the text in
     nodeUpdate.select("text").style("fill-opacity", 1);
@@ -314,7 +354,7 @@ var treeView =
   {
     var nodeSize = MIN_NODE_SIZE;
     
-    if(tree.field)
+    /*if(tree.field)
     {
       if(node.values && node.values[tree.field.name])
       {
@@ -323,7 +363,7 @@ var treeView =
       }
       
       if(nodeSize < MIN_NODE_SIZE) { nodeSize = MIN_NODE_SIZE; }
-    }
+    }*/
     
     return nodeSize;       
   }   

@@ -22,8 +22,7 @@ var spreadSheetView =
   spreadSheetMarkup: function()
   {
     return '<div id="spreadSheetView">' +
-      '<div id="project-action-container"></div>' +
-      '<div id="expanderContainer"></div>' +
+      '<div id="spreadSheetViewActions"><div id="project-action-container"></div><div id="expanderContainer"></div></div>' +
       '<div id="fields-header-row"></div>' +
       '<div id="redips-drag"></div>' +
       '<div id="data-container"></div>' +

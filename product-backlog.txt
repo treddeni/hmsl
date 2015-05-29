@@ -12,6 +12,10 @@ Incomplete User Stories
 
 Bugs/Issues
 -----------
+- Use minified scripts for external libraries
+- Add depths to the large example dataset
+- Need to reformat field values after/during aggregation
+- Need to reformat field value on cell exit
 - Check for uniqueness of a new project's name
 - Improve/cleanup the UI and styling
 - Add error checking and error handling
