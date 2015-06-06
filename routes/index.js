@@ -10,6 +10,37 @@ router.get('/', function(req, res, next)
   res.sendFile(absolutePath);
 });
 
+router.get('/api/versions', function(req, res, next) 
+{
+  var pid = parseInt(req.query.projectID);
+
+  //find the tree with the newest version for the requested project
+  db.connection.collection('tree').find({projectID:pid}).sort({version:-1}).toArray(function(err, documents)
+  {
+    if(err) throw err;
+    
+    var versions = [];
+    documents.forEach(function(document){ versions.push({ 'version': document.version }); });
+    
+    res.json(JSON.stringify({ 'versions': versions }));
+  });
+});
+
+router.get('/api/version', function(req, res, next) 
+{
+  var pid = parseInt(req.query.projectID);
+  var v = parseInt(req.query.version);
+
+  //find the tree with the newest version for the requested project
+  db.connection.collection('tree').find({projectID:pid, version:v}).sort({version:-1}).limit(1).toArray(function(err, documents)
+  {
+    if(err) throw err;
+    var tree = documents[0];
+    //TODO: handle case where tree is undefined/null
+    res.json(tree);
+  });
+});
+
 router.get('/api/tree', function(req, res, next) 
 {
   var pid = parseInt(req.query.projectID);
@@ -42,16 +73,24 @@ router.get('/api/projects', function(req, res, next)
 
 router.post('/api/tree', function(req, res)
 {
-  var tree = JSON.parse(req.body.json);
-  tree.version++;   //TODO: need to check the database and get the version that we should use
-  delete tree._id;  //remove the _id from the tree so that MongoDB will assign a new unique id
+  var newTree = JSON.parse(req.body.json);
+  
+  //find the tree with the newest version for the requested project
+  db.connection.collection('tree').find({projectID:newTree.projectID}).sort({version:-1}).limit(1).toArray(function(err, documents)
+  {
+    if(err) throw err;
+    var headTree = documents[0];
+    //TODO: handle case where tree is undefined/null
 
-  db.connection.collection('tree').insert(tree, function(err, inserted) 
-  { 
-    if(err) throw err;    //TODO: handle error
+    newTree.version = headTree.version + 1;
+    delete newTree._id;  //remove the _id from the tree so that MongoDB will assign a new unique id
+  
+    db.connection.collection('tree').insert(newTree, function(err, inserted) 
+    { 
+      if(err) throw err;    //TODO: handle error
+      res.sendStatus(201);
+    });
   });
-
-  res.sendStatus(201);
 });
 
 router.post('/api/addProject', function(req, res)

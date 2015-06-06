@@ -15,10 +15,22 @@ var hms =
     projects.openProject(projectID, function(tree)
     {
       project.tree = tree;
-      hms.selectView(headerView.selectedView());    
+      
+      $.ajax({ type: 'GET', url: 'api/versions?projectID=1' }).done(function(versions)
+      {
+        headerView.refresh(JSON.parse(versions).versions);
+        hms.selectView(headerView.selectedView());
+      });    
     });     
   },
-  saveToDatabase: function() { project.saveToDatabase(); },
+  saveToDatabase: function() 
+  { 
+    project.saveToDatabase();
+    $.ajax({ type: 'GET', url: 'api/versions?projectID=1' }).done(function(versions)
+    {
+      headerView.refresh(JSON.parse(versions).versions);
+    });      
+  },
   selectView: function(viewID)
   {
     if(project.tree)
@@ -27,6 +39,14 @@ var hms =
       this.showView(viewID);
     }
   },
+  selectVersion: function(version)
+  {
+    projects.openProjectVersion(project.tree.projectID, version, function(tree)
+    {
+      project.tree = tree;
+      hms.selectView(headerView.selectedView());
+    });
+  },  
   showView: function(viewID)
   {
     switch(viewID)

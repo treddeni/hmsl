@@ -1,10 +1,5 @@
 Incomplete User Stories
 -----------------------
-- Copy nodes/assemblies on the tree view
-- Circle packing view
-- Partition view
-- Clickable hierarchical pareto chart
-- Choose a previous version of the project to open
 - Name the version of the project being saved
 - Set a reason for change when saving a project
 - Resize a column
@@ -50,9 +45,14 @@ Future User Stories
 - Run a report (particular reports TBD)
 - Undo the previous change to the project
 - Redo the previously undone change to the project
+- Copy nodes/assemblies on the tree view
+- Circle packing view
+- Partition view
+- Clickable hierarchical pareto chart
 
 Completed User Stories
 ----------------------
+- Choose a previous version of the project to open
 - Expand all nodes
 - Expand nodes to a selected structure level/depth
 - Create a project

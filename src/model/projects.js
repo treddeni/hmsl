@@ -21,5 +21,12 @@ var projects =
     {
       finishFn(data);
     });     
+  },
+  openProjectVersion: function(projectID, version, finishFn)
+  {
+    $.ajax({ type: 'GET', url: 'api/version?projectID=' + projectID + '&version=' + version }).done(function(data)               //read tree for the selected project version from the database
+    {
+      finishFn(data);
+    });     
   } 
 };

@@ -11,24 +11,42 @@ var headerView =
     });
   
     markup += '<option id="newProjectOption" value="-1">Create New Project...</option></select>'
-    + '<input id="editNewProjectNameInput" class="form-control"></input>'
-    + '<a href="#" id="save-database-button" class="btn btn-default">Save to Database</a>';
+    + '<input id="editNewProjectNameInput" class="form-control"></input>';
     //markup += '<a href="#" class="btn btn-default" id="save-file-button" onclick="saveLocally()">Save as File</a>';    
     
-    markup += '<select id="viewSelector" class="form-control">' +
+    $('#header').html(markup);
+    
+    //event handlers
+    $('#projectSelector').change(function() { headerView.selectProject($(this)); });
+    $('#editNewProjectNameInput').keyup(function(e) { headerView.createNewProject(e); });
+  },
+  refresh: function(versions)
+  {
+    $('#versionSelector').remove();
+    $('#viewSelector').remove();
+    $('#save-database-button').remove();
+    
+    var versionSelector = '<select id="versionSelector" class="form-control">';
+    versions.forEach(function(version) 
+    { 
+      versionSelector += '<option value="' + version.version + '">' + version.version + '</option>';   
+    });
+    versionSelector += '</select>';
+    $('#header').append(versionSelector);
+    
+    $('#header').append('<a href="#" id="save-database-button" class="btn btn-default">Save to Database</a>');
+    
+    var viewSelector = '<select id="viewSelector" class="form-control">' +
     '<option value="0">Spread Sheet</option>' +
     '<option value="1">Tree</option>' +
     '<option value="2">Weighted Tree</option>' +
     '<option value="3">Circle Packing</option>' +
     '</select>';
     
-    $('#header').html(markup);
-    
-    //event handlers
-    $('#projectSelector').change(function() { headerView.selectProject($(this)); });
+    $('#header').append(viewSelector);
     $('#save-database-button').click(function() { hms.saveToDatabase(); });
     $('#viewSelector').change(function() { hms.selectView($(this).val()); });
-    $('#editNewProjectNameInput').keyup(function(e) { headerView.createNewProject(e); });
+    $('#versionSelector').change(function() { hms.selectVersion($(this).val()); });     
   },
   selectedView: function()
   {
