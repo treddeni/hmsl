@@ -16,20 +16,24 @@ var hms =
     {
       project.tree = tree;
       
-      $.ajax({ type: 'GET', url: 'api/versions?projectID=1' }).done(function(versions)
+      $.ajax({ type: 'GET', url: 'api/versions?projectID=' + projectID }).done(function(versions)
       {
         headerView.refresh(JSON.parse(versions).versions);
         hms.selectView(headerView.selectedView());
       });    
     });     
   },
+  openSaveDBDialog: function()
+  {
+    project.getCurrentVersion(function(currentVersion) 
+    { 
+      saveDBDialog.render(project.tree.version, project.tree.versionLabel, project.tree.versionDate, currentVersion+1);
+    });
+  },
   saveToDatabase: function() 
   { 
     project.saveToDatabase();
-    $.ajax({ type: 'GET', url: 'api/versions?projectID=1' }).done(function(versions)
-    {
-      headerView.refresh(JSON.parse(versions).versions);
-    });      
+    this.openProject(project.tree.projectID);    
   },
   selectView: function(viewID)
   {

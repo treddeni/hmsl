@@ -64,6 +64,8 @@ var house = {
 	"projectName": "Small Test Project",
 	"name": "Small Test Project",
 	"version": 2,
+  "versionDate": '1/1/2015 1:23:45',
+  "versionLabel": 'Milestone 1.3',
 	"nextNodeID": 16,
 	"depth": 0,
   "maxDepth": 4,

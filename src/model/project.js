@@ -5,6 +5,13 @@ var project =
     this.cleanseData();
     $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: { json: JSON.stringify(this.tree) } });
   },
+  getCurrentVersion: function(finishFn)
+  {
+    $.ajax({ type: 'GET', url: 'api/tree?projectID=' + this.tree.projectID }).done(function(data)               //read tree for the selected project from the database
+    {
+      finishFn(data.version);
+    });      
+  },
   fields: function()
   {
     return this.tree.fields;

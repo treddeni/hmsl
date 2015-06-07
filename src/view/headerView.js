@@ -2,6 +2,7 @@ var headerView =
 {
   render: function(projects)
   {
+    console.log('render');
     var markup = '<select id="projectSelector" class="form-control">' +
     '<option id="selectProjectOption" value="0">Select Project...</option>';
   
@@ -14,17 +15,30 @@ var headerView =
     + '<input id="editNewProjectNameInput" class="form-control"></input>';
     //markup += '<a href="#" class="btn btn-default" id="save-file-button" onclick="saveLocally()">Save as File</a>';    
     
+     markup += '<a href="#" id="save-database-button" class="btn btn-default">Save to Database</a>';
+    
+    markup += '<select id="viewSelector" class="form-control">' +
+    '<option value="0">Spread Sheet</option>' +
+    '<option value="1">Tree</option>' +
+    '<option value="2">Weighted Tree</option>' +
+    '<option value="3">Circle Packing</option>' +
+    '</select>'; 
+    
     $('#header').html(markup);
+    
+    $('#viewSelector').hide();
+    $('#save-database-button').hide();
     
     //event handlers
     $('#projectSelector').change(function() { headerView.selectProject($(this)); });
     $('#editNewProjectNameInput').keyup(function(e) { headerView.createNewProject(e); });
+    $('#save-database-button').click(function() { hms.openSaveDBDialog(); });
+    $('#viewSelector').change(function() { hms.selectView($(this).val()); });
   },
   refresh: function(versions)
   {
+    console.log('refresh');
     $('#versionSelector').remove();
-    $('#viewSelector').remove();
-    $('#save-database-button').remove();
     
     var versionSelector = '<select id="versionSelector" class="form-control">';
     versions.forEach(function(version) 
@@ -34,18 +48,9 @@ var headerView =
     versionSelector += '</select>';
     $('#header').append(versionSelector);
     
-    $('#header').append('<a href="#" id="save-database-button" class="btn btn-default">Save to Database</a>');
+    $('#viewSelector').show();
+    $('#save-database-button').show();
     
-    var viewSelector = '<select id="viewSelector" class="form-control">' +
-    '<option value="0">Spread Sheet</option>' +
-    '<option value="1">Tree</option>' +
-    '<option value="2">Weighted Tree</option>' +
-    '<option value="3">Circle Packing</option>' +
-    '</select>';
-    
-    $('#header').append(viewSelector);
-    $('#save-database-button').click(function() { hms.saveToDatabase(); });
-    $('#viewSelector').change(function() { hms.selectView($(this).val()); });
     $('#versionSelector').change(function() { hms.selectVersion($(this).val()); });     
   },
   selectedView: function()
