@@ -1,4 +1,5 @@
-@header-height:          80px;
+@header-height:          100px;
+@header-label-height:    20px;
 @tree-width:             499px;
 @fields-header-height:   34px;
 @default-cell-width:     80px;
@@ -19,39 +20,59 @@
 #projectSelector
 {
   width:    @project-select-width;
-  top:      0px;
+  top:      @header-label-height;
   left:     0px;
   position: absolute  
+}
+
+#projectSelectorLabel
+{
+  left: 5px;
+  position: absolute;
 }
 
 #editNewProjectNameInput
 {
   display:  none;
   width:    @project-select-width;
-  top:      0px;
+  top:      @header-label-height;
   left:     0px;
   position: absolute
 }
 
 #versionSelector
 {
-  top: 0px;
+  top: @header-label-height;
   left: @project-select-width + 5;
   width: @version-selector-width;
   position: absolute;
 }
 
+#versionSelectorLabel
+{
+  left: @project-select-width + 5 + 5;
+  position: absolute;
+}
+
 #viewSelector
 {
-  top: 0px;
+  top: @header-label-height;
   left: @project-select-width + 10 + @version-selector-width;
   width: 200px;
   position: absolute;
 }
 
+#viewSelectorLabel
+{
+  left: @project-select-width + 10 + @version-selector-width + 5;
+  position: absolute;
+}
+
 #save-database-button
 {
-  float: right;
+  top: @header-label-height;
+  right: 0px;
+  position: absolute;
 }
 
 #save-file-button

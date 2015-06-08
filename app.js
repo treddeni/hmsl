@@ -32,6 +32,15 @@ app.use(function(req, res, next) {
     next(err);
 });
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', "http://localhost");
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+};
+
+app.use(allowCrossDomain);
+
+
 // error handlers
 
 // development error handler

@@ -2,8 +2,9 @@ var headerView =
 {
   render: function(projects)
   {
-    console.log('render');
-    var markup = '<select id="projectSelector" class="form-control">' +
+    var markup = '<label id="projectSelectorLabel">Project:</label><label id="versionSelectorLabel">Version:</label><label id="viewSelectorLabel">View:</label>';
+    
+    markup += '<select id="projectSelector" class="form-control">' +
     '<option id="selectProjectOption" value="0">Select Project...</option>';
   
     projects.forEach(function(project)
@@ -28,6 +29,8 @@ var headerView =
     
     $('#viewSelector').hide();
     $('#save-database-button').hide();
+    $('#viewSelectorLabel').hide();
+    $('#versionSelectorLabel').hide();
     
     //event handlers
     $('#projectSelector').change(function() { headerView.selectProject($(this)); });
@@ -37,10 +40,10 @@ var headerView =
   },
   refresh: function(versions)
   {
-    console.log('refresh');
     $('#versionSelector').remove();
     
     var versionSelector = '<select id="versionSelector" class="form-control">';
+    
     versions.forEach(function(version) 
     { 
       versionSelector += '<option value="' + version.version + '">' + version.version + '</option>';   
@@ -50,6 +53,8 @@ var headerView =
     
     $('#viewSelector').show();
     $('#save-database-button').show();
+    $('#viewSelectorLabel').show();
+    $('#versionSelectorLabel').show();
     
     $('#versionSelector').change(function() { hms.selectVersion($(this).val()); });     
   },
@@ -89,5 +94,19 @@ var headerView =
               
       hms.createNewProject(newProjectName);
     }    
+  },
+  selectVersion: function(version)
+  {
+    $('#versionSelector').val(version);
+  },
+  setVersionOutOfDate: function()
+  {
+    $('#versionSelectorLabel').html('Version Out of Date');
+    $('#versionSelectorLabel').css('color', 'red');
+  },
+  setVersionCurrent: function()
+  {
+    $('#versionSelectorLabel').html('Version:');
+    $('#versionSelectorLabel').css('color', 'black');    
   }
 };

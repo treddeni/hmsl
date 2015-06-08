@@ -1,9 +1,9 @@
 var project =
 {
-  saveToDatabase: function()
+  saveToDatabase: function(finishFn)
   {
     this.cleanseData();
-    $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: { json: JSON.stringify(this.tree) } });
+    $.ajax({ type: 'POST', url: '/api/tree', dataType: 'json', data: { json: JSON.stringify(this.tree) } }).done(finishFn());
   },
   getCurrentVersion: function(finishFn)
   {
