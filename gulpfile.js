@@ -57,6 +57,11 @@ gulp.task('seed_house', function()
   seed(exampleData.house);
 });
 
+gulp.task('seed_heroku_house', function()
+{
+  seedHeroku(exampleData.house);
+});
+
 function seed(data)
 {
   mongo.connect(database.url, function (err, db) 
@@ -68,7 +73,25 @@ function seed(data)
     
     db.collection('projects').remove({}, function() 
     { 
-      db.collection('projects').insert(exampleData.projects); 
+      db.collection('projects').insert(exampleData.defaultProjects); 
+    });
+  });  
+}
+
+function seedHeroku(data)
+{
+  var dbURL = 'mongodb://hms:hms@ds035162.mongolab.com:35162/hms';
+  
+  mongo.connect(dbURL, function (err, db) 
+  {
+    db.collection('tree').remove({}, function() 
+    { 
+      db.collection('tree').insert(data);
+    });
+    
+    db.collection('projects').remove({}, function() 
+    { 
+      db.collection('projects').insert(exampleData.defaultProjects); 
     });
   });  
 }

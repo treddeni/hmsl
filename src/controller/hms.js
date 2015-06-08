@@ -20,8 +20,36 @@ var hms =
       {
         headerView.refresh(JSON.parse(versions).versions);
         hms.selectView(headerView.selectedView());
+        hms.versionCurrent = true;
+        headerView.setVersionCurrent();
+        hms.startVersionChecking();
       });    
     });     
+  },
+  startVersionChecking: function()
+  {
+    clearInterval(hms.versionCheckInterval);
+    hms.versionCheckInterval = setInterval(function() 
+    {
+      project.getCurrentVersion(function(version)
+      {
+        if(hms.versionCurrent && version > project.tree.version)
+        {
+          hms.versionCurrent = false;
+          headerView.setVersionOutOfDate();
+          $.ajax({ type: 'GET', url: 'api/versions?projectID=' + project.tree.projectID }).done(function(versions)
+          {
+            headerView.refresh(JSON.parse(versions).versions);
+            headerView.selectVersion(project.tree.version);
+          });           
+        }
+        else if(!hms.versionCurrent && version === project.tree.version)
+        {
+          hms.versionCurrent = true;
+          headerView.setVersionCurrent();
+        }
+      });
+    }, 1000);    
   },
   openSaveDBDialog: function()
   {
@@ -32,8 +60,7 @@ var hms =
   },
   saveToDatabase: function() 
   { 
-    project.saveToDatabase();
-    this.openProject(project.tree.projectID);    
+    project.saveToDatabase(function() { hms.openProject(project.tree.projectID); });
   },
   selectView: function(viewID)
   {
@@ -78,12 +105,19 @@ var hms =
   },
   createNewProject: function(newProjectName)
   {  	
-    projects.createNewProject(newProjectName);
-  	hms.selectView(headerView.selectedView());      
+    projects.createNewProject(newProjectName, function()
+    {
+      $.ajax({ type: 'GET', url: 'api/versions?projectID=' + project.tree.projectID }).done(function(versions)
+      {
+        headerView.refresh(JSON.parse(versions).versions);
+        hms.selectView(headerView.selectedView());
+        hms.startVersionChecking();
+      });
+    });     
   },
   nextProjectID: function()
   {
-    return projects.nextProjectID++;
+    return projects.nextProjectID();
   },
   expandToLevel: function(level)
   {

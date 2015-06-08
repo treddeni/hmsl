@@ -1,4 +1,4 @@
-var projects = { "_id": 1, "nextProjectID": 2, "projects": [ { "id": 1, "name": "Test Project" } ] };
+var defaultProjects = { "_id": 1, "nextProjectID": 2, "projects": [ { "id": 1, "name": "Test Project" } ] };
 
 var smallTree = {
   "_id": "55525dd17a68e8501aa22260",
@@ -63,7 +63,7 @@ var house = {
 	"projectID": 1,
 	"projectName": "Small Test Project",
 	"name": "Small Test Project",
-	"version": 2,
+	"version": 1,
   "versionDate": '1/1/2015 1:23:45',
   "versionLabel": 'Milestone 1.3',
 	"nextNodeID": 16,
@@ -21547,4 +21547,4 @@ var largeTree = {
 exports.smallTree = smallTree;
 exports.largeTree = largeTree;
 exports.house = house;
-exports.projects = projects;
+exports.defaultProjects = defaultProjects;
