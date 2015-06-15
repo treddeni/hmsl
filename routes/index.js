@@ -62,6 +62,7 @@ router.get('/api/projects', function(req, res, next)
     if(err) throw err;
     var projects = documents[0];
     
+    //TODO: handle error case
     // if(projects === undefined)
     // {
     //   projects = defaults.PROJECTS;
@@ -113,6 +114,7 @@ router.post('/api/addProject', function(req, res)
     //read the current project document to get the nextProjectID
     var projectList = documents[0];
     
+    //TODO: handle error case
     // if(projectList === undefined)
     // {
     //   projectList = defaults.PROJECTS;

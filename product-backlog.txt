@@ -11,6 +11,7 @@ Incomplete User Stories
 
 Bugs/Issues
 -----------
+- Sometimes the version reverts to the previous when saving to the database (even though the save was successful)
 - Use minified scripts for external libraries
 - Add depths to the large example dataset
 - Need to reformat field values after/during aggregation
@@ -49,6 +50,9 @@ Future User Stories
 - Circle packing view
 - Partition view
 - Clickable hierarchical pareto chart
+- Visual comparison of two project versions
+- Configurations
+- Search for parts/assemblies in all projects
 
 Completed User Stories
 ----------------------
