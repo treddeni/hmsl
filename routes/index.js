@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
+<<<<<<< HEAD
+=======
+//var defaults = require('../defaults');
+>>>>>>> 7982e7bea29d61094176af4993db18038243aa75
 var db = require('../db');
 
 router.get('/', function(req, res, next)
@@ -61,7 +65,10 @@ router.get('/api/projects', function(req, res, next)
     if(err) throw err;
     var projects = documents[0];
     
+<<<<<<< HEAD
     //TODO: handle error case
+=======
+>>>>>>> 7982e7bea29d61094176af4993db18038243aa75
     // if(projects === undefined)
     // {
     //   projects = defaults.PROJECTS;
@@ -113,7 +120,10 @@ router.post('/api/addProject', function(req, res)
     //read the current project document to get the nextProjectID
     var projectList = documents[0];
     
+<<<<<<< HEAD
     //TODO: handle error case
+=======
+>>>>>>> 7982e7bea29d61094176af4993db18038243aa75
     // if(projectList === undefined)
     // {
     //   projectList = defaults.PROJECTS;
