@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
-var defaults = require('../defaults');
+//var defaults = require('../defaults');
 var db = require('../db');
 
 router.get('/', function(req, res, next)
@@ -62,10 +62,10 @@ router.get('/api/projects', function(req, res, next)
     if(err) throw err;
     var projects = documents[0];
     
-    if(projects === undefined)
-    {
-      projects = defaults.PROJECTS;
-    }
+    // if(projects === undefined)
+    // {
+    //   projects = defaults.PROJECTS;
+    // }
     
     res.json(projects);
   });
@@ -113,11 +113,11 @@ router.post('/api/addProject', function(req, res)
     //read the current project document to get the nextProjectID
     var projectList = documents[0];
     
-    if(projectList === undefined)
-    {
-      projectList = defaults.PROJECTS;
-      db.connection.collection('projects').insert(defaults.PROJECTS);       //TODO: handle db error
-    }
+    // if(projectList === undefined)
+    // {
+    //   projectList = defaults.PROJECTS;
+    //   db.connection.collection('projects').insert(defaults.PROJECTS);       //TODO: handle db error
+    // }
     
     //TODO: fix concurrency problem, another user could add a project between when we read nextProjectID and add the new project
     
