@@ -5,15 +5,13 @@ var sourcemaps = require('gulp-sourcemaps');
 var less = require('gulp-less');
 var minifyCSS = require('gulp-minify-css');
 var del = require('del');
-var mongo = require('mongodb');
-var database = require('./db');
 var exampleData = require('./test/data/example-data');
 
 var paths = { scripts: ['src/*', 'src/**/*'], styles: ['public/css/styles.less'] };
 
 gulp.task('clean', function(cb) 
 {
-  del(['public/javascripts/hms.min.js'], cb);
+  return del(['public/javascripts/hms.min.js'], cb);
 });
 
 //concatenate javascripts into a single javascripts, with sourcemaps, and minify
@@ -29,7 +27,7 @@ gulp.task('scripts', ['clean'], function()
 
 gulp.task('styles', function() 
 {
-  gulp.src(['public/css/styles.less'])
+  return gulp.src(['public/css/styles.less'])
     .pipe(less())
     .pipe(minifyCSS())
     .pipe(gulp.dest('public/css'));
@@ -64,6 +62,9 @@ gulp.task('seed_heroku_house', function()
 
 function seed(data)
 {
+  var mongo = require('mongodb');
+  var database = require('./db');
+  
   mongo.connect(database.url, function (err, db) 
   {
     db.collection('tree').remove({}, function() 
@@ -81,6 +82,7 @@ function seed(data)
 function seedHeroku(data)
 {
   var dbURL = 'mongodb://hms:hms@ds035162.mongolab.com:35162/hms';
+  var mongo = require('mongodb');
   
   mongo.connect(dbURL, function (err, db) 
   {
