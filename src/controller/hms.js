@@ -1,3 +1,5 @@
+"use strict";
+
 $(document).ready(function()
 {
   scrollBarWidth = getScrollBarWidth();  //get the scrollbar width for the browser, to use later for sizing other elements 

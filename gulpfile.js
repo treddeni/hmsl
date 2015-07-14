@@ -1,3 +1,4 @@
+"use strict";
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
@@ -34,30 +35,10 @@ gulp.task('styles', function()
 });
 
 // Rerun the task when a file changes
-gulp.task('watch', function() 
+gulp.task('watch', ['scripts', 'styles'], function() 
 {
   gulp.watch(paths.scripts, ['scripts']);
   gulp.watch(paths.styles, ['styles']);
-});
-
-gulp.task('seed_large', function()
-{
-  seed(exampleData.largeTree);
-});
-
-gulp.task('seed_small', function()
-{
-  seed(exampleData.smallTree);
-});
-
-gulp.task('seed_house', function()
-{
-  seed(exampleData.house);
-});
-
-gulp.task('seed_heroku_house', function()
-{
-  seedHeroku(exampleData.house);
 });
 
 function seed(data)
@@ -97,3 +78,23 @@ function seedHeroku(data)
     });
   });  
 }
+
+gulp.task('seed_large', function()
+{
+  seed(exampleData.largeTree);
+});
+
+gulp.task('seed_small', function()
+{
+  seed(exampleData.smallTree);
+});
+
+gulp.task('seed_house', function()
+{
+  seed(exampleData.house);
+});
+
+gulp.task('seed_heroku_house', function()
+{
+  seedHeroku(exampleData.house);
+});
